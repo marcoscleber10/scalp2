@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScalpCalc – Robot Mode</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #060a0f;
+    --panel:     #0c1117;
+    --border:    #1a2433;
+    --accent:    #00e5ff;
+    --green:     #00ff88;
+    --red:       #ff3b5c;
+    --yellow:    #ffcc00;
+    --muted:     #4a6070;
+    --text:      #cdd6e0;
+    --text2:     #7a9ab0;
+    --glow:      0 0 18px rgba(0,229,255,.25);
+    --glow-g:    0 0 18px rgba(0,255,136,.25);
+    --glow-r:    0 0 18px rgba(255,59,92,.25);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Animated grid background ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Scan line effect ── */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,.08) 2px,
+      rgba(0,0,0,.08) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative; z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-bottom: 2px solid var(--accent);
+    margin-bottom: 16px;
+    border-radius: 6px 6px 0 0;
+  }
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    color: var(--accent);
+    letter-spacing: .08em;
+    text-shadow: var(--glow);
+  }
+  .logo span { color: var(--text2); }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 10px var(--green);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: .4; transform: scale(.6); }
+  }
+
+  /* ── Grid layout ── */
+  .grid { display: grid; gap: 12px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  @media(max-width: 600px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  /* ── Panel card ── */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .card-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .7rem;
+    color: var(--muted);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Inputs ── */
+  .field { margin-bottom: 12px; }
+  label {
+    display: block;
+    font-size: .78rem;
+    color: var(--text2);
+    margin-bottom: 5px;
+    letter-spacing: .04em;
+  }
+  input[type=number], select {
+    width: 100%;
+    background: #080d13;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .9rem;
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    -moz-appearance: textfield;
+  }
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(0,229,255,.12);
+  }
+
+  /* ── Buttons ── */
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  button {
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: .85rem;
+    letter-spacing: .06em;
+    padding: 8px 14px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    transition: all .18s;
+  }
+  .btn-default {
+    background: transparent;
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn-default:hover {
+    background: rgba(0,229,255,.1);
+    box-shadow: var(--glow);
+  }
+  .btn-cons {
+    background: transparent;
+    border-color: var(--green);
+    color: var(--green);
+    flex: 1;
+  }
+  .btn-cons:hover {
+    background: rgba(0,255,136,.1);
+    box-shadow: var(--glow-g);
+  }
+  .btn-agg {
+    background: transparent;
+    border-color: var(--red);
+    color: var(--red);
+    flex: 1;
+  }
+  .btn-agg:hover {
+    background: rgba(255,59,92,.1);
+    box-shadow: var(--glow-r);
+  }
+  .btn-scan {
+    width: 100%;
+    background: linear-gradient(135deg, #00c4dc, #0087ff);
+    border: none;
+    color: #000;
+    font-size: .95rem;
+    padding: 11px;
+    border-radius: 4px;
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-scan::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.25) 50%, transparent 100%);
+    transform: translateX(-100%);
+    transition: transform .5s;
+  }
+  .btn-scan:hover::after { transform: translateX(100%); }
+
+  /* ── Metric display ── */
+  .metric {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .metric:last-child { border-bottom: none; }
+  .metric-label { font-size: .8rem; color: var(--text2); }
+  .metric-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .val-green { color: var(--green); text-shadow: var(--glow-g); }
+  .val-red   { color: var(--red);   text-shadow: var(--glow-r); }
+  .val-blue  { color: var(--accent); text-shadow: var(--glow); }
+  .val-yellow{ color: var(--yellow); }
+
+  /* ── Signal box ── */
+  .signal-box {
+    border-radius: 6px;
+    padding: 18px;
+    text-align: center;
+    border: 2px solid var(--border);
+    transition: all .35s;
+  }
+  .signal-box.buy {
+    border-color: var(--green);
+    background: rgba(0,255,136,.06);
+    box-shadow: var(--glow-g), inset 0 0 40px rgba(0,255,136,.05);
+  }
+  .signal-box.sell {
+    border-color: var(--red);
+    background: rgba(255,59,92,.06);
+    box-shadow: var(--glow-r), inset 0 0 40px rgba(255,59,92,.05);
+  }
+  .signal-box.neutral {
+    border-color: var(--yellow);
+    background: rgba(255,204,0,.04);
+  }
+  .signal-icon { font-size: 2.4rem; line-height: 1; margin-bottom: 6px; }
+  .signal-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+  }
+  .signal-sub { font-size: .78rem; color: var(--text2); margin-top: 4px; }
+
+  /* ── Score arc ── */
+  .score-wrap { text-align: center; padding: 8px 0 4px; }
+  .score-arc {
+    width: 120px; height: 70px;
+    position: relative;
+    margin: 0 auto 8px;
+  }
+  .score-arc svg { overflow: visible; }
+  .score-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .score-label { font-size: .72rem; color: var(--text2); letter-spacing: .1em; text-transform: uppercase; }
+
+  /* ── Indicator rows ── */
+  .ind-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: .85rem;
+  }
+  .ind-row:last-child { border-bottom: none; }
+  .ind-name { flex: 1; color: var(--text2); }
+  .ind-val { font-family: 'JetBrains Mono', monospace; font-size: .88rem; min-width: 60px; text-align: right; }
+  .ind-badge {
+    font-size: .68rem;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-weight: 700;
+    letter-spacing: .06em;
+  }
+  .badge-buy  { background: rgba(0,255,136,.15); color: var(--green); border: 1px solid rgba(0,255,136,.3); }
+  .badge-sell { background: rgba(255,59,92,.15);  color: var(--red);   border: 1px solid rgba(255,59,92,.3); }
+  .badge-neu  { background: rgba(255,204,0,.12);  color: var(--yellow);border: 1px solid rgba(255,204,0,.3); }
+
+  /* ── RR bar ── */
+  .rr-bar-wrap { margin-top: 10px; }
+  .rr-bar-track {
+    height: 8px;
+    background: #101820;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    margin-top: 6px;
+  }
+  .rr-bar-stop { background: var(--red);   transition: width .4s; }
+  .rr-bar-take { background: var(--green); transition: width .4s; }
+  .rr-labels { display: flex; justify-content: space-between; font-size: .72rem; color: var(--text2); margin-top: 4px; }
+
+  /* ── Ticker ── */
+  .ticker-bar {
+    background: #08111a;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 7px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .ticker-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: var(--glow); flex-shrink: 0; }
+  .ticker-msg { white-space: nowrap; animation: scroll-left 18s linear infinite; }
+  @keyframes scroll-left {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ── History log ── */
+  .log-entry {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    color: var(--text2);
+  }
+  .log-entry:last-child { border-bottom: none; }
+  .log-time { color: var(--muted); flex-shrink: 0; }
+  .log-msg.buy  { color: var(--green); }
+  .log-msg.sell { color: var(--red); }
+  .log-msg.neu  { color: var(--yellow); }
+
+  /* ── Binance API section ── */
+  .api-notice {
+    background: rgba(0,229,255,.04);
+    border: 1px solid rgba(0,229,255,.2);
+    border-radius: 6px;
+    padding: 14px;
+    font-size: .8rem;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+  .api-notice strong { color: var(--accent); }
+  .api-endpoint {
+    background: #080d13;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    color: var(--green);
+    margin-top: 10px;
+    word-break: break-all;
+  }
+
+  /* ── Spinning loader ── */
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="logo">SCALP<span>CALC</span> // <span style="color:var(--accent)">ROBOT MODE</span></div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--text2);">
+      <div class="status-dot"></div> DEMO ATIVO
+    </div>
+  </header>
+
+  <!-- Ticker -->
+  <div class="ticker-bar">
+    <div class="ticker-dot"></div>
+    <div class="ticker-msg" id="tickerMsg">
+      ⚡ Modo Robot ativo — RSI + VWAP + Tendência &nbsp;&nbsp;&nbsp; 
+      📌 Stop padrão: 1.2% &nbsp;&nbsp;&nbsp; 
+      🎯 Take padrão: 1.8% &nbsp;&nbsp;&nbsp; 
+      ⚡ Modo Robot ativo — RSI + VWAP + Tendência &nbsp;&nbsp;&nbsp; 
+      📌 Stop padrão: 1.2% &nbsp;&nbsp;&nbsp; 
+      🎯 Take padrão: 1.8%
+    </div>
+  </div>
+
+  <!-- Row 1: Inputs + Signal -->
+  <div class="grid grid-2" style="margin-bottom:12px;">
+
+    <!-- Inputs -->
+    <div class="card">
+      <div class="card-title">⚙ Parâmetros</div>
+
+      <div class="field">
+        <label>Preço de Entrada ($)</label>
+        <input type="number" id="entryPrice" value="67000" step="0.01" min="0">
+      </div>
+
+      <div class="grid grid-2" style="gap:8px;">
+        <div class="field">
+          <label>Stop Loss (%)</label>
+          <input type="number" id="stopPct" value="1.2" step="0.1" min="0.1">
+        </div>
+        <div class="field">
+          <label>Take Profit (%)</label>
+          <input type="number" id="takePct" value="1.8" step="0.1" min="0.1">
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-cons" onclick="setMode(.8,1.2)">🛡 Conservador</button>
+        <button class="btn-default" onclick="setMode(1.2,1.8)" style="flex:1;">📌 Padrão</button>
+        <button class="btn-agg" onclick="setMode(2,3)">⚡ Agressivo</button>
+      </div>
+
+      <button class="btn-scan" onclick="runScan()">
+        <span id="btnLabel">🤖 ESCANEAR MERCADO</span>
+        <span id="btnSpinner" class="spinner hidden"></span>
+      </button>
+    </div>
+
+    <!-- Signal -->
+    <div class="card" style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card-title">📡 Sinal Atual</div>
+
+      <div class="signal-box neutral" id="signalBox">
+        <div class="signal-icon" id="signalIcon">⏳</div>
+        <div class="signal-text" id="signalText">AGUARDANDO</div>
+        <div class="signal-sub" id="signalSub">Clique em Escanear Mercado</div>
+      </div>
+
+      <!-- Score -->
+      <div class="score-wrap">
+        <div class="score-arc">
+          <svg width="120" height="70" viewBox="0 0 120 70">
+            <path d="M10,65 A55,55 0 0,1 110,65" fill="none" stroke="#1a2433" stroke-width="8" stroke-linecap="round"/>
+            <path id="arcFill" d="M10,65 A55,55 0 0,1 110,65" fill="none" stroke="#00e5ff" stroke-width="8" stroke-linecap="round"
+              stroke-dasharray="0 173" style="transition:stroke-dasharray .6s ease, stroke .4s;"/>
+          </svg>
+        </div>
+        <div class="score-num" id="scoreNum" style="color:var(--accent);">--</div>
+        <div class="score-label">Score de Confluência</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Targets + Indicators -->
+  <div class="grid grid-2" style="margin-bottom:12px;">
+
+    <!-- Targets -->
+    <div class="card">
+      <div class="card-title">💰 Alvos Calculados</div>
+
+      <div class="metric">
+        <span class="metric-label">Preço de Entrada</span>
+        <span class="metric-value val-blue" id="dispEntry">$0.00</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">🔴 Stop Loss</span>
+        <span class="metric-value val-red" id="dispStop">$0.00</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">🟢 Take Profit</span>
+        <span class="metric-value val-green" id="dispTake">$0.00</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Risco / Retorno</span>
+        <span class="metric-value val-yellow" id="dispRR">0 : 0</span>
+      </div>
+
+      <div class="rr-bar-wrap">
+        <div style="font-size:.72rem;color:var(--text2);">Visualização R/R</div>
+        <div class="rr-bar-track">
+          <div class="rr-bar-stop" id="rrStop" style="width:40%;"></div>
+          <div class="rr-bar-take" id="rrTake" style="width:60%;"></div>
+        </div>
+        <div class="rr-labels"><span>RISCO</span><span>RETORNO</span></div>
+      </div>
+    </div>
+
+    <!-- Indicators -->
+    <div class="card">
+      <div class="card-title">📊 Indicadores</div>
+
+      <div class="ind-row">
+        <span class="ind-name">RSI (14)</span>
+        <span class="ind-val" id="indRsi" style="color:var(--text)">--</span>
+        <span class="ind-badge badge-neu" id="badgeRsi">--</span>
+      </div>
+      <div class="ind-row">
+        <span class="ind-name">VWAP</span>
+        <span class="ind-val" id="indVwap" style="color:var(--text)">--</span>
+        <span class="ind-badge badge-neu" id="badgeVwap">--</span>
+      </div>
+      <div class="ind-row">
+        <span class="ind-name">Tendência</span>
+        <span class="ind-val" id="indTrend" style="color:var(--text)">--</span>
+        <span class="ind-badge badge-neu" id="badgeTrend">--</span>
+      </div>
+      <div class="ind-row">
+        <span class="ind-name">Volatilidade</span>
+        <span class="ind-val" id="indVol" style="color:var(--text)">--</span>
+        <span class="ind-badge badge-neu" id="badgeVol">--</span>
+      </div>
+      <div class="ind-row">
+        <span class="ind-name">Momentum</span>
+        <span class="ind-val" id="indMom" style="color:var(--text)">--</span>
+        <span class="ind-badge badge-neu" id="badgeMom">--</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Binance API info -->
+  <div class="card" style="margin-bottom:12px;">
+    <div class="card-title">🔌 Integração API Binance (Próximo Passo)</div>
+    <div class="api-notice">
+      <strong>⚠️ Segurança:</strong> Nunca coloque sua API Key diretamente no HTML. Use um backend intermediário.<br><br>
+      <strong>Arquitetura correta:</strong> <code>Seu site → Backend Node.js → API Binance</code><br><br>
+      Quando seu backend estiver no ar, substitua a simulação abaixo pela chamada real:
+      <div class="api-endpoint">
+        // Substitua a função simulateIndicators() por:<br>
+        const res = await fetch("https://SEU-BACKEND.com/signal?symbol=BTCUSDT");<br>
+        const data = await res.json();<br>
+        // data = { price, rsi, vwap, signal, suggestedStop, suggestedTake }
+      </div>
+    </div>
+  </div>
+
+  <!-- Log -->
+  <div class="card">
+    <div class="card-title">📋 Log de Sinais</div>
+    <div id="logList">
+      <div class="log-entry"><span class="log-time">--:--:--</span><span class="log-msg neu">Sistema iniciado. Aguardando primeiro scan...</span></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  Recalculates price targets whenever inputs change
+// ─────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+
+function recalc() {
+  const entry   = parseFloat($('entryPrice').value) || 0;
+  const stopPct = parseFloat($('stopPct').value)    || 1.2;
+  const takePct = parseFloat($('takePct').value)    || 1.8;
+
+  const stopPrice = entry * (1 - stopPct / 100);
+  const takePrice = entry * (1 + takePct / 100);
+  const rr = (takePct / stopPct).toFixed(2);
+
+  $('dispEntry').textContent = '$' + entry.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  $('dispStop').textContent  = '$' + stopPrice.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  $('dispTake').textContent  = '$' + takePrice.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  $('dispRR').textContent    = '1 : ' + rr;
+
+  // RR bar
+  const total = stopPct + takePct;
+  $('rrStop').style.width = (stopPct / total * 100) + '%';
+  $('rrTake').style.width = (takePct / total * 100) + '%';
+}
+
+function setMode(stop, take) {
+  $('stopPct').value = stop;
+  $('takePct').value = take;
+  recalc();
+}
+
+['entryPrice','stopPct','takePct'].forEach(id => $( id ).addEventListener('input', recalc));
+recalc();
+
+// ─────────────────────────────────────────────
+//  Simulate market indicators (replace with real API later)
+// ─────────────────────────────────────────────
+function rand(min, max) { return Math.random() * (max - min) + min; }
+
+function simulateIndicators(entry) {
+  const rsi   = rand(20, 80);
+  const vwap  = entry * (1 + rand(-0.012, 0.012));
+  const trend = ['ALTA', 'BAIXA', 'LATERAL'][Math.floor(rand(0,3))];
+  const vol   = ['BAIXA','MÉDIA','ALTA'][Math.floor(rand(0,3))];
+  const mom   = rand(-1,1);
+
+  return { rsi, vwap, trend, vol, mom };
+}
+
+function scoreCalc(ind, entry) {
+  let s = 50;
+  if (ind.rsi < 35)               s += 20;
+  else if (ind.rsi > 65)          s -= 20;
+  else if (ind.rsi < 45)          s += 8;
+  else if (ind.rsi > 55)          s -= 8;
+
+  if (entry < ind.vwap)           s += 15;
+  else                            s -= 10;
+
+  if (ind.trend === 'ALTA')       s += 10;
+  else if (ind.trend === 'BAIXA') s -= 10;
+
+  if (ind.vol === 'ALTA')         s -= 5;
+  if (ind.vol === 'BAIXA')        s += 5;
+
+  if (ind.mom > 0.4)              s += 10;
+  else if (ind.mom < -0.4)        s -= 10;
+
+  return Math.max(0, Math.min(100, Math.round(s)));
+}
+
+function determineSignal(ind, entry) {
+  const buy  = ind.rsi < 35 && entry < ind.vwap;
+  const sell = ind.rsi > 65;
+  if (buy)  return 'BUY';
+  if (sell) return 'SELL';
+  return 'NEUTRAL';
+}
+
+// ─────────────────────────────────────────────
+//  Update UI
+// ─────────────────────────────────────────────
+function updateBadge(el, type) {
+  el.className = 'ind-badge';
+  if (type === 'buy')  { el.classList.add('badge-buy');  el.textContent = '▲ COMPRA'; }
+  else if (type==='sell') { el.classList.add('badge-sell'); el.textContent = '▼ VENDA'; }
+  else                 { el.classList.add('badge-neu');  el.textContent = '◆ NEUTRO'; }
+}
+
+function updateArc(score) {
+  const arc   = $('arcFill');
+  const total = 173; // half-circle perimeter ≈ π * r = π * 55
+  const fill  = (score / 100) * total;
+  const color = score >= 70 ? 'var(--green)' : score >= 40 ? 'var(--accent)' : 'var(--red)';
+  arc.setAttribute('stroke-dasharray', fill + ' ' + (total - fill));
+  arc.setAttribute('stroke', color);
+  $('scoreNum').style.color = color;
+  $('scoreNum').textContent = score;
+}
+
+function addLog(type, msg) {
+  const now = new Date().toLocaleTimeString('pt-BR');
+  const li  = document.createElement('div');
+  li.className = 'log-entry';
+  li.innerHTML = `<span class="log-time">${now}</span><span class="log-msg ${type}">${msg}</span>`;
+  const list = $('logList');
+  list.insertBefore(li, list.firstChild);
+  // keep max 8 entries
+  while (list.children.length > 8) list.removeChild(list.lastChild);
+}
+
+async function runScan() {
+  const entry = parseFloat($('entryPrice').value) || 0;
+  if (!entry) { alert('Insira o preço de entrada.'); return; }
+
+  // Loading state
+  $('btnLabel').classList.add('hidden');
+  $('btnSpinner').classList.remove('hidden');
+
+  // Simulate async delay (remove when using real API)
+  await new Promise(r => setTimeout(r, 900));
+
+  // ── Replace this block with real API fetch ──
+  const ind    = simulateIndicators(entry);
+  const signal = determineSignal(ind, entry);
+  const score  = scoreCalc(ind, entry);
+  // ────────────────────────────────────────────
+
+  // Signal box
+  const box = $('signalBox');
+  box.className = 'signal-box ';
+  if (signal === 'BUY') {
+    box.classList.add('buy');
+    $('signalIcon').textContent = '🟢';
+    $('signalText').textContent = 'COMPRA DETECTADA';
+    $('signalSub').textContent  = 'RSI baixo + Preço abaixo do VWAP';
+    addLog('buy', `BUY signal — RSI ${ind.rsi.toFixed(1)} | VWAP $${ind.vwap.toFixed(2)} | Score ${score}`);
+  } else if (signal === 'SELL') {
+    box.classList.add('sell');
+    $('signalIcon').textContent = '🔴';
+    $('signalText').textContent = 'VENDA DETECTADA';
+    $('signalSub').textContent  = 'RSI elevado — aguardar recuo';
+    addLog('sell', `SELL signal — RSI ${ind.rsi.toFixed(1)} | VWAP $${ind.vwap.toFixed(2)} | Score ${score}`);
+  } else {
+    box.classList.add('neutral');
+    $('signalIcon').textContent = '🟡';
+    $('signalText').textContent = 'MERCADO NEUTRO';
+    $('signalSub').textContent  = 'Aguardar confluência de sinais';
+    addLog('neu', `NEUTRAL — RSI ${ind.rsi.toFixed(1)} | VWAP $${ind.vwap.toFixed(2)} | Score ${score}`);
+  }
+
+  // Indicators
+  $('indRsi').textContent  = ind.rsi.toFixed(1);
+  $('indVwap').textContent = '$' + ind.vwap.toFixed(2);
+  $('indTrend').textContent= ind.trend;
+  $('indVol').textContent  = ind.vol;
+  $('indMom').textContent  = ind.mom > 0 ? '+' + ind.mom.toFixed(2) : ind.mom.toFixed(2);
+
+  $('indRsi').style.color  = ind.rsi < 35 ? 'var(--green)' : ind.rsi > 65 ? 'var(--red)' : 'var(--text)';
+  $('indVwap').style.color = entry < ind.vwap ? 'var(--green)' : 'var(--red)';
+  $('indTrend').style.color= ind.trend==='ALTA'?'var(--green)':ind.trend==='BAIXA'?'var(--red)':'var(--yellow)';
+  $('indMom').style.color  = ind.mom > 0 ? 'var(--green)' : 'var(--red)';
+
+  updateBadge($('badgeRsi'),   ind.rsi < 35 ? 'buy' : ind.rsi > 65 ? 'sell' : 'neu');
+  updateBadge($('badgeVwap'),  entry < ind.vwap ? 'buy' : 'sell');
+  updateBadge($('badgeTrend'), ind.trend==='ALTA'?'buy':ind.trend==='BAIXA'?'sell':'neu');
+  updateBadge($('badgeVol'),   ind.vol==='BAIXA'?'buy':ind.vol==='ALTA'?'sell':'neu');
+  updateBadge($('badgeMom'),   ind.mom > 0.3 ? 'buy' : ind.mom < -0.3 ? 'sell' : 'neu');
+
+  updateArc(score);
+  recalc();
+
+  // Restore button
+  $('btnLabel').classList.remove('hidden');
+  $('btnSpinner').classList.add('hidden');
+}
+</script>
+</body>
+</html>
