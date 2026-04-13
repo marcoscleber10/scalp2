@@ -154,6 +154,11 @@
     border-color: var(--accent);
     box-shadow: 0 0 0 2px rgba(0,229,255,.12);
   }
+  input:disabled {
+    background: #0a1118;
+    color: var(--muted);
+    cursor: not-allowed;
+  }
 
   .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
   button {
@@ -226,6 +231,11 @@
     transition: transform .5s;
   }
   .btn-scan:hover:not(:disabled)::after { transform: translateX(100%); }
+  
+  .btn-small {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
 
   .metric {
     display: flex;
@@ -378,28 +388,6 @@
   .log-msg.neu  { color: var(--yellow); }
   #logList { max-height: 180px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
-  .api-notice {
-    background: rgba(0,229,255,.04);
-    border: 1px solid rgba(0,229,255,.2);
-    border-radius: 6px;
-    padding: 14px;
-    font-size: .8rem;
-    color: var(--text2);
-    line-height: 1.6;
-  }
-  .api-notice strong { color: var(--accent); }
-  .api-endpoint {
-    background: #080d13;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 10px 14px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: .75rem;
-    color: var(--green);
-    margin-top: 10px;
-    word-break: break-all;
-  }
-
   .spinner {
     display: inline-block;
     width: 14px; height: 14px;
@@ -435,6 +423,153 @@
     line-height: 1.5;
   }
   .footer-disclaimer strong { color: var(--text2); }
+
+  /* ── Toggle Switch Manual/Auto ── */
+  .price-mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    padding: 8px;
+    background: #080d13;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .toggle-label {
+    font-size: 0.75rem;
+    color: var(--text2);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 26px;
+  }
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #1a2433;
+    transition: .3s;
+    border-radius: 26px;
+    border: 1px solid var(--border);
+  }
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--muted);
+    transition: .3s;
+    border-radius: 50%;
+  }
+  input:checked + .toggle-slider {
+    background-color: rgba(0, 229, 255, 0.2);
+    border-color: var(--accent);
+  }
+  input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+    background-color: var(--accent);
+  }
+  .toggle-mode-text {
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    min-width: 70px;
+    text-align: center;
+  }
+  .toggle-mode-text.manual { color: var(--yellow); }
+  .toggle-mode-text.auto { color: var(--green); }
+  
+  /* API Status Indicator */
+  .api-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: rgba(0,255,136,.05);
+    border-radius: 4px;
+    font-size: 0.72rem;
+    color: var(--text2);
+  }
+  .api-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .api-status.error .api-status-dot {
+    background: var(--red);
+    box-shadow: 0 0 8px var(--red);
+    animation: none;
+  }
+  .api-status.error {
+    background: rgba(255,59,92,.05);
+    color: var(--red);
+  }
+  .api-timer {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+  }
+  
+  .price-input-wrapper {
+    position: relative;
+  }
+  .price-badge {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-weight: 700;
+    background: rgba(0,229,255,.15);
+    color: var(--accent);
+    border: 1px solid rgba(0,229,255,.3);
+  }
+  
+  .symbol-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .symbol-selector select {
+    flex: 1;
+  }
+  .btn-refresh {
+    padding: 9px 12px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-refresh:hover:not(:disabled) {
+    background: rgba(0,229,255,.1);
+    box-shadow: var(--glow);
+  }
+  .btn-refresh:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 
   /* ── Mobile Enhancements ── */
   @media (max-width: 600px) {
@@ -478,6 +613,9 @@
     #logList { max-height: 150px; }
     
     .ticker-bar { padding: 8px 12px; font-size: 0.7rem; }
+    
+    .price-mode-toggle { flex-wrap: wrap; }
+    .symbol-selector { flex-direction: column; }
   }
 
   @media (prefers-color-scheme: dark) {
@@ -543,9 +681,44 @@
     <div class="card">
       <div class="card-title">⚙ Parâmetros</div>
 
+      <!-- Symbol Selector -->
+      <div class="symbol-selector">
+        <select id="symbolSelect">
+          <option value="BTCUSDT">BTC/USDT</option>
+          <option value="ETHUSDT">ETH/USDT</option>
+          <option value="SOLUSDT">SOL/USDT</option>
+          <option value="BNBUSDT">BNB/USDT</option>
+          <option value="XRPUSDT">XRP/USDT</option>
+        </select>
+        <button class="btn-refresh" id="refreshBtn" onclick="fetchBinancePrice()" type="button" title="Atualizar preço agora">
+          🔄
+        </button>
+      </div>
+
+      <!-- Toggle Manual/Auto -->
+      <div class="price-mode-toggle">
+        <span class="toggle-label">Modo:</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="priceModeToggle">
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-mode-text manual" id="modeText">🔧 MANUAL</span>
+      </div>
+
+      <!-- Price Input -->
       <div class="field">
         <label for="entryPrice">Preço de Entrada ($)</label>
-        <input type="number" id="entryPrice" value="67000" step="0.01" min="0" inputmode="decimal">
+        <div class="price-input-wrapper">
+          <input type="number" id="entryPrice" value="67000" step="0.01" min="0" inputmode="decimal">
+          <span class="price-badge hidden" id="autoBadge">🔄 AUTO</span>
+        </div>
+      </div>
+
+      <!-- API Status -->
+      <div class="api-status hidden" id="apiStatus">
+        <div class="api-status-dot"></div>
+        <span id="apiStatusText">Binance API conectada</span>
+        <span class="api-timer" id="apiTimer">--s</span>
       </div>
 
       <div class="grid grid-2" style="gap:8px;">
@@ -667,20 +840,6 @@
     </div>
   </div>
 
-  <!-- Binance API info -->
-  <div class="card" style="margin-bottom:12px;">
-    <div class="card-title">🔌 Integração API (Próximo Passo)</div>
-    <div class="api-notice">
-      <strong>⚠️ Segurança:</strong> Nunca coloque API Keys no frontend. Use backend intermediário.<br><br>
-      <strong>Arquitetura:</strong> <code>Frontend → Backend Node.js → Binance API</code><br><br>
-      Para usar dados reais, substitua <code>fetchIndicators()</code> por:
-      <div class="api-endpoint">
-        const res = await fetch("https://SEU-BACKEND/api/signal?symbol=BTCUSDT");<br>
-        return await res.json();
-      </div>
-    </div>
-  </div>
-
   <!-- Log -->
   <div class="card">
     <div class="card-title">📋 Log de Sinais</div>
@@ -703,6 +862,175 @@
 //  UTILS & SELECTORS
 // ─────────────────────────────────────────────
 const $ = id => document.getElementById(id);
+
+// Binance API config
+const BINANCE_API = 'https://api.binance.com/api/v3';
+let autoUpdateInterval = null;
+let countdownInterval = null;
+let countdown = 10;
+
+// ─────────────────────────────────────────────
+//  BINANCE API INTEGRATION
+// ─────────────────────────────────────────────
+async function fetchBinancePrice() {
+  const symbol = $('symbolSelect').value;
+  const refreshBtn = $('refreshBtn');
+  
+  try {
+    refreshBtn.disabled = true;
+    showApiStatus('loading', 'Atualizando...');
+    
+    const response = await fetch(`${BINANCE_API}/ticker/price?symbol=${symbol}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    
+    const data = await response.json();
+    const price = parseFloat(data.price);
+    
+    // Update price input
+    $('entryPrice').value = price.toFixed(2);
+    recalc();
+    
+    showApiStatus('success', `Binance API • ${symbol}`);
+    addLogEntry('INFO', price, null, `Preço atualizado: $${price.toLocaleString('en-US', {minimumFractionDigits: 2})}`);
+    
+    // Reset countdown
+    countdown = 10;
+    
+  } catch (error) {
+    console.error('❌ Binance API Error:', error);
+    showApiStatus('error', 'Erro na API Binance');
+    addLogEntry('ERROR', 0, null, `Falha ao buscar preço: ${error.message}`);
+  } finally {
+    refreshBtn.disabled = false;
+  }
+}
+
+function showApiStatus(status, text) {
+  const statusEl = $('apiStatus');
+  const statusText = $('apiStatusText');
+  const statusDot = statusEl.querySelector('.api-status-dot');
+  
+  statusEl.classList.remove('hidden', 'error');
+  statusText.textContent = text;
+  
+  if (status === 'error') {
+    statusEl.classList.add('error');
+  }
+}
+
+function startAutoUpdate() {
+  // Clear existing intervals
+  if (autoUpdateInterval) clearInterval(autoUpdateInterval);
+  if (countdownInterval) clearInterval(countdownInterval);
+  
+  // Fetch immediately
+  fetchBinancePrice();
+  
+  // Update every 10 seconds
+  autoUpdateInterval = setInterval(() => {
+    fetchBinancePrice();
+    countdown = 10;
+  }, 10000);
+  
+  // Countdown timer
+  countdownInterval = setInterval(() => {
+    countdown--;
+    $('apiTimer').textContent = `${countdown}s`;
+    if (countdown < 0) countdown = 10;
+  }, 1000);
+}
+
+function stopAutoUpdate() {
+  if (autoUpdateInterval) {
+    clearInterval(autoUpdateInterval);
+    autoUpdateInterval = null;
+  }
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+  $('apiTimer').textContent = '--s';
+}
+
+// ─────────────────────────────────────────────
+//  PRICE MODE TOGGLE (MANUAL/AUTO)
+// ─────────────────────────────────────────────
+function setupPriceModeToggle() {
+  const toggle = $('priceModeToggle');
+  const entryPrice = $('entryPrice');
+  const modeText = $('modeText');
+  const autoBadge = $('autoBadge');
+  
+  // Load saved preference
+  const savedMode = localStorage.getItem('scalpcalc_priceMode');
+  const savedSymbol = localStorage.getItem('scalpcalc_symbol');
+  
+  if (savedSymbol) {
+    $('symbolSelect').value = savedSymbol;
+  }
+  
+  if (savedMode === 'auto') {
+    toggle.checked = true;
+    modeText.textContent = '🔄 AUTO';
+    modeText.className = 'toggle-mode-text auto';
+    entryPrice.disabled = true;
+    autoBadge.classList.remove('hidden');
+    startAutoUpdate();
+  } else {
+    toggle.checked = false;
+    modeText.textContent = '🔧 MANUAL';
+    modeText.className = 'toggle-mode-text manual';
+    entryPrice.disabled = false;
+    autoBadge.classList.add('hidden');
+    $('apiStatus').classList.add('hidden');
+    stopAutoUpdate();
+  }
+  
+  // Toggle handler
+  toggle.addEventListener('change', (e) => {
+    if (e.target.checked) {
+      // Switch to AUTO
+      modeText.textContent = '🔄 AUTO';
+      modeText.className = 'toggle-mode-text auto';
+      entryPrice.disabled = true;
+      autoBadge.classList.remove('hidden');
+      $('apiStatus').classList.remove('hidden');
+      
+      // Save preference
+      localStorage.setItem('scalpcalc_priceMode', 'auto');
+      
+      // Start auto update
+      startAutoUpdate();
+      
+      addLogEntry('INFO', 0, null, 'Modo AUTOMÁTICO ativado • Preço da Binance');
+    } else {
+      // Switch to MANUAL
+      modeText.textContent = '🔧 MANUAL';
+      modeText.className = 'toggle-mode-text manual';
+      entryPrice.disabled = false;
+      autoBadge.classList.add('hidden');
+      $('apiStatus').classList.add('hidden');
+      
+      // Save preference
+      localStorage.setItem('scalpcalc_priceMode', 'manual');
+      
+      // Stop auto update
+      stopAutoUpdate();
+      
+      addLogEntry('INFO', 0, null, 'Modo MANUAL ativado');
+    }
+    entryPrice.focus();
+  });
+  
+  // Symbol change handler
+  $('symbolSelect').addEventListener('change', () => {
+    localStorage.setItem('scalpcalc_symbol', $('symbolSelect').value);
+    if (toggle.checked) {
+      fetchBinancePrice();
+    }
+    addLogEntry('INFO', 0, null, `Par alterado para: ${$('symbolSelect').value}`);
+  });
+}
 
 // ─────────────────────────────────────────────
 //  CÁLCULOS DE PREÇO E R/R
@@ -767,6 +1095,7 @@ async function runScan() {
 
   try {
     const entryPrice = parseFloat($('entryPrice').value) || 67000;
+    const isAutoMode = $('priceModeToggle').checked;
     
     // Simular delay de rede (remover ao usar API real)
     await new Promise(resolve => setTimeout(resolve, 700));
@@ -782,7 +1111,7 @@ async function runScan() {
     updateIndicatorsUI(indicators);
     updateSignalUI(signal, score);
     updateScoreArc(score, signal);
-    addLogEntry(signal, entryPrice, score);
+    addLogEntry(signal, entryPrice, score, isAutoMode ? '[AUTO]' : '[MANUAL]');
     
     // Recalcular alvos
     recalc();
@@ -855,23 +1184,6 @@ async function fetchIndicators(entryPrice) {
       });
     }, 600);
   });
-
-  // 🌐 MODO REAL (descomente quando tiver backend)
-  /*
-  async function fetchIndicators(entryPrice) {
-    const res = await fetch(`https://SEU-BACKEND.com/api/signal?symbol=BTCUSDT&entry=${entryPrice}`);
-    if (!res.ok) throw new Error(`API error: ${res.status}`);
-    const data = await res.json();
-    return {
-      rsi: data.data.indicators.rsi,
-      vwap: data.data.indicators.vwap,
-      trend: data.data.indicators.trend,
-      vol: data.data.indicators.volatility,
-      mom: data.data.indicators.momentum,
-      price: data.data.price
-    };
-  }
-  */
 }
 
 // ─────────────────────────────────────────────
@@ -1122,7 +1434,7 @@ function resetToInitial() {
 // ─────────────────────────────────────────────
 //  LOG DE SINAIS
 // ─────────────────────────────────────────────
-function addLogEntry(signal, entryPrice, score, customMsg = null) {
+function addLogEntry(signal, entryPrice, score, prefix = null) {
   const logList = $('logList');
   if (!logList) return;
   
@@ -1130,7 +1442,18 @@ function addLogEntry(signal, entryPrice, score, customMsg = null) {
   entry.className = 'log-entry';
   
   const time = new Date().toLocaleTimeString('pt-BR', {hour12: false});
-  const msg = customMsg || `Sinal ${signal} • Score: ${score} • Entrada: $${entryPrice}`;
+  let msg = '';
+  
+  if (signal === 'INFO' || signal === 'ERROR') {
+    msg = entryPrice || '';
+  } else {
+    msg = `Sinal ${signal} • Score: ${score} • Entrada: $${entryPrice}`;
+  }
+  
+  if (prefix) {
+    msg = `${prefix} • ${msg}`;
+  }
+  
   const signalClass = signal === 'BUY' ? 'buy' : signal === 'SELL' ? 'sell' : 'neu';
   
   entry.innerHTML = `<span class="log-time">${time}</span><span class="log-msg ${signalClass}">${msg}</span>`;
@@ -1210,19 +1533,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // Recalcular valores iniciais
   recalc();
   
+  // Setup price mode toggle (Manual/Auto)
+  setupPriceModeToggle();
+  
   // Setup mobile UX
   setupMobileUX();
   
   // Log inicial
-  console.log('🚀 ScalpCalc Robot Mode v2.1 carregado');
-  console.log('💡 Dica: Use os presets para ajustar risco rapidamente');
-  
-  // Opcional: Auto-scan após carregamento (comentar se quiser manual)
-  // setTimeout(() => {
-  //   if (!localStorage.getItem('scalpcalc_autoScanDisabled')) {
-  //     runScan();
-  //   }
-  // }, 1500);
+  console.log('🚀 ScalpCalc Robot Mode v3.0 carregado');
+  console.log('💡 Dica: Use o toggle para alternar entre preço manual e automático');
 });
 
 // Keyboard shortcuts (opcional)
@@ -1241,6 +1560,11 @@ document.addEventListener('keydown', (e) => {
     if (e.key === '2') setMode(1.2, 1.8);
     if (e.key === '3') setMode(2, 3);
   }
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+  stopAutoUpdate();
 });
 </script>
 
