@@ -7,8 +7,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
-<meta name="description" content="ScalpCalc – Ferramenta educativa para análise de scalp trading">
-<title>ScalpCalc – Robot Mode</title>
+<meta name="description" content="ScalpCalc – Ferramenta educativa para scalp trading multi-timeframe">
+<title>ScalpCalc – Robot Mode MT</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -62,7 +62,7 @@
 
   .container {
     position: relative; z-index: 1;
-    max-width: 900px;
+    max-width: 1100px;
     margin: 0 auto;
     padding: 16px;
   }
@@ -259,11 +259,11 @@
 
   .signal-box {
     border-radius: 6px;
-    padding: 18px;
+    padding: 16px;
     text-align: center;
     border: 2px solid var(--border);
     transition: all .35s;
-    min-height: 120px;
+    min-height: 140px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -283,55 +283,63 @@
     border-color: var(--yellow);
     background: rgba(255,204,0,.04);
   }
-  .signal-icon { font-size: 2.4rem; line-height: 1; margin-bottom: 6px; }
+  .signal-icon { font-size: 2rem; line-height: 1; margin-bottom: 4px; }
   .signal-text {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    letter-spacing: .1em;
+    letter-spacing: .08em;
   }
-  .signal-sub { font-size: .78rem; color: var(--text2); margin-top: 4px; }
+  .signal-sub { font-size: .72rem; color: var(--text2); margin-top: 2px; }
+  .signal-tf { 
+    font-size: 0.68rem; 
+    color: var(--muted); 
+    margin-top: 6px; 
+    padding: 2px 8px; 
+    background: rgba(255,255,255,.05);
+    border-radius: 3px;
+  }
 
-  .score-wrap { text-align: center; padding: 8px 0 4px; }
+  .score-wrap { text-align: center; padding: 6px 0 2px; }
   .score-arc {
-    width: 120px; height: 70px;
+    width: 100px; height: 58px;
     position: relative;
-    margin: 0 auto 8px;
+    margin: 0 auto 6px;
   }
   .score-arc svg { overflow: visible; }
   .score-num {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 2rem;
+    font-size: 1.6rem;
     font-weight: 700;
     line-height: 1;
-    min-height: 2.4rem;
+    min-height: 2rem;
   }
-  .score-label { font-size: .72rem; color: var(--text2); letter-spacing: .1em; text-transform: uppercase; }
+  .score-label { font-size: .65rem; color: var(--text2); letter-spacing: .08em; text-transform: uppercase; }
 
   .ind-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 7px 0;
+    gap: 8px;
+    padding: 6px 0;
     border-bottom: 1px solid var(--border);
-    font-size: .85rem;
+    font-size: .8rem;
   }
   .ind-row:last-child { border-bottom: none; }
   .ind-name { flex: 1; color: var(--text2); }
   .ind-val { 
     font-family: 'JetBrains Mono', monospace; 
-    font-size: .88rem; 
-    min-width: 60px; 
+    font-size: .82rem; 
+    min-width: 50px; 
     text-align: right;
     min-height: 1.2em;
   }
   .ind-badge {
-    font-size: .68rem;
-    padding: 2px 7px;
+    font-size: .64rem;
+    padding: 2px 6px;
     border-radius: 3px;
     font-weight: 700;
-    letter-spacing: .06em;
-    min-width: 65px;
+    letter-spacing: .05em;
+    min-width: 55px;
     text-align: center;
   }
   .badge-buy  { background: rgba(0,255,136,.15); color: var(--green); border: 1px solid rgba(0,255,136,.3); }
@@ -374,19 +382,21 @@
 
   .log-entry {
     font-family: 'JetBrains Mono', monospace;
-    font-size: .72rem;
-    padding: 5px 0;
+    font-size: .7rem;
+    padding: 4px 0;
     border-bottom: 1px solid var(--border);
     display: flex;
-    gap: 10px;
+    gap: 8px;
     color: var(--text2);
   }
   .log-entry:last-child { border-bottom: none; }
-  .log-time { color: var(--muted); flex-shrink: 0; min-width: 70px; }
+  .log-time { color: var(--muted); flex-shrink: 0; min-width: 65px; font-size: 0.68rem; }
   .log-msg.buy  { color: var(--green); }
   .log-msg.sell { color: var(--red); }
   .log-msg.neu  { color: var(--yellow); }
-  #logList { max-height: 180px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .log-msg.info { color: var(--accent); }
+  .log-msg.error { color: var(--red); }
+  #logList { max-height: 160px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
   .spinner {
     display: inline-block;
@@ -414,13 +424,13 @@
   }
 
   .footer-disclaimer {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--muted);
     text-align: center;
-    margin-top: 20px;
-    padding: 12px;
+    margin-top: 16px;
+    padding: 10px;
     border-top: 1px solid var(--border);
-    line-height: 1.5;
+    line-height: 1.4;
   }
   .footer-disclaimer strong { color: var(--text2); }
 
@@ -499,7 +509,7 @@
     padding: 6px 10px;
     background: rgba(0,255,136,.05);
     border-radius: 4px;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     color: var(--text2);
   }
   .api-status-dot {
@@ -571,8 +581,122 @@
     cursor: not-allowed;
   }
 
+  /* ── Multi-Timeframe Signals ── */
+  .tf-signals-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .tf-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+  }
+  
+  .tf-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tf-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .tf-badge {
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: rgba(0,229,255,.1);
+    color: var(--accent);
+    border: 1px solid rgba(0,229,255,.3);
+  }
+  
+  .tf-indicators {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 10px;
+  }
+  .tf-ind-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    padding: 4px 0;
+  }
+  .tf-ind-label { color: var(--text2); }
+  .tf-ind-value { 
+    font-family: 'JetBrains Mono', monospace; 
+    font-weight: 600;
+    min-width: 45px;
+    text-align: right;
+  }
+  
+  .tf-score-mini {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .tf-score-bar {
+    flex: 1;
+    height: 6px;
+    background: #101820;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .tf-score-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width .4s ease, background .3s;
+  }
+  .tf-score-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    min-width: 35px;
+    text-align: right;
+  }
+
+  /* ── Confluence Alert ── */
+  .confluence-alert {
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .confluence-alert.confluence {
+    background: rgba(0,255,136,.08);
+    border: 1px solid var(--green);
+    color: var(--green);
+  }
+  .confluence-alert.conflict {
+    background: rgba(255,59,92,.08);
+    border: 1px solid var(--red);
+    color: var(--red);
+  }
+  .confluence-alert.neutral {
+    background: rgba(255,204,0,.06);
+    border: 1px solid var(--yellow);
+    color: var(--yellow);
+  }
+
   /* ── Mobile Enhancements ── */
-  @media (max-width: 600px) {
+  @media (max-width: 768px) {
     .container { padding: 12px; }
     header { padding: 12px 16px; }
     .logo { font-size: 0.95rem; }
@@ -590,32 +714,42 @@
     
     .grid-2, .grid-3 { grid-template-columns: 1fr !important; gap: 12px !important; }
     
-    .signal-box { padding: 20px 16px; min-height: 130px; }
-    .signal-icon { font-size: 2.8rem; }
-    .signal-text { font-size: 1.1rem; }
-    .signal-sub { font-size: 0.8rem; }
+    .signal-box { padding: 14px 12px; min-height: 125px; }
+    .signal-icon { font-size: 1.8rem; }
+    .signal-text { font-size: 0.9rem; }
     
-    .score-arc { width: 140px; height: 80px; }
-    .score-num { font-size: 2.3rem; }
+    .score-arc { width: 90px; height: 52px; }
+    .score-num { font-size: 1.5rem; }
     
     .btn-scan { font-size: 1rem; padding: 14px; font-weight: 700; }
     .btn-row { gap: 6px; }
     .btn-row button { font-size: 0.8rem; padding: 10px 8px; }
     
-    .ind-row { padding: 10px 0; font-size: 0.9rem; }
-    .ind-val { min-width: 70px; font-weight: 600; }
-    .ind-badge { min-width: 70px; text-align: center; font-size: 0.7rem; }
+    .ind-row { padding: 8px 0; font-size: 0.85rem; }
+    .ind-val { min-width: 60px; font-weight: 600; }
+    .ind-badge { min-width: 60px; text-align: center; font-size: 0.68rem; }
     
     .metric { padding: 10px 0; }
     .metric-label { font-size: 0.85rem; }
-    .metric-value { font-size: 1.05rem; }
+    .metric-value { font-size: 1rem; }
     
-    #logList { max-height: 150px; }
+    #logList { max-height: 140px; }
     
     .ticker-bar { padding: 8px 12px; font-size: 0.7rem; }
     
     .price-mode-toggle { flex-wrap: wrap; }
     .symbol-selector { flex-direction: column; }
+    
+    /* Multi-timeframe mobile */
+    .tf-signals-container {
+      grid-template-columns: 1fr;
+    }
+    .tf-card {
+      padding: 12px;
+    }
+    .tf-indicators {
+      grid-template-columns: 1fr;
+    }
   }
 
   @media (prefers-color-scheme: dark) {
@@ -655,9 +789,9 @@
 
   <!-- Header -->
   <header>
-    <div class="logo">SCALP<span>CALC</span> // <span style="color:var(--accent)">ROBOT MODE</span></div>
+    <div class="logo">SCALP<span>CALC</span> // <span style="color:var(--accent)">MT MODE</span></div>
     <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--text2);">
-      <div class="status-dot"></div> <span id="statusText">DEMO ATIVO</span>
+      <div class="status-dot"></div> <span id="statusText">SCALP 1min + 15min</span>
     </div>
   </header>
 
@@ -665,178 +799,202 @@
   <div class="ticker-bar">
     <div class="ticker-dot"></div>
     <div class="ticker-msg">
-      ⚡ Robot Mode: RSI + VWAP + Tendência &nbsp;&nbsp;&nbsp; 
+      ⚡ Multi-Timeframe: 1min + 15min &nbsp;&nbsp;&nbsp; 
       📌 Stop: 1.2% &nbsp;&nbsp;&nbsp; 
       🎯 Take: 1.8% &nbsp;&nbsp;&nbsp; 
-      ⚡ Robot Mode: RSI + VWAP + Tendência &nbsp;&nbsp;&nbsp; 
+      ⚡ Scalp rápido + estruturado &nbsp;&nbsp;&nbsp; 
       📌 Stop: 1.2% &nbsp;&nbsp;&nbsp; 
       🎯 Take: 1.8%
     </div>
   </div>
 
-  <!-- Row 1: Inputs + Signal -->
-  <div class="grid grid-2" style="margin-bottom:12px;">
+  <!-- Row 1: Inputs -->
+  <div class="card" style="margin-bottom:12px;">
+    <div class="card-title">⚙ Parâmetros</div>
 
-    <!-- Inputs -->
-    <div class="card">
-      <div class="card-title">⚙ Parâmetros</div>
-
-      <!-- Symbol Selector -->
-      <div class="symbol-selector">
-        <select id="symbolSelect">
-          <option value="BTCUSDT">BTC/USDT</option>
-          <option value="ETHUSDT">ETH/USDT</option>
-          <option value="SOLUSDT">SOL/USDT</option>
-          <option value="BNBUSDT">BNB/USDT</option>
-          <option value="XRPUSDT">XRP/USDT</option>
-        </select>
-        <button class="btn-refresh" id="refreshBtn" onclick="fetchBinancePrice()" type="button" title="Atualizar preço agora">
-          🔄
-        </button>
-      </div>
-
-      <!-- Toggle Manual/Auto -->
-      <div class="price-mode-toggle">
-        <span class="toggle-label">Modo:</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="priceModeToggle">
-          <span class="toggle-slider"></span>
-        </label>
-        <span class="toggle-mode-text manual" id="modeText">🔧 MANUAL</span>
-      </div>
-
-      <!-- Price Input -->
-      <div class="field">
-        <label for="entryPrice">Preço de Entrada ($)</label>
-        <div class="price-input-wrapper">
-          <input type="number" id="entryPrice" value="67000" step="0.01" min="0" inputmode="decimal">
-          <span class="price-badge hidden" id="autoBadge">🔄 AUTO</span>
-        </div>
-      </div>
-
-      <!-- API Status -->
-      <div class="api-status hidden" id="apiStatus">
-        <div class="api-status-dot"></div>
-        <span id="apiStatusText">Binance API conectada</span>
-        <span class="api-timer" id="apiTimer">--s</span>
-      </div>
-
-      <div class="grid grid-2" style="gap:8px;">
-        <div class="field">
-          <label for="stopPct">Stop Loss (%)</label>
-          <input type="number" id="stopPct" value="1.2" step="0.1" min="0.1" inputmode="decimal">
-        </div>
-        <div class="field">
-          <label for="takePct">Take Profit (%)</label>
-          <input type="number" id="takePct" value="1.8" step="0.1" min="0.1" inputmode="decimal">
-        </div>
-      </div>
-
-      <div class="btn-row">
-        <button class="btn-cons" onclick="setMode(.8,1.2)" type="button">🛡 Conservador</button>
-        <button class="btn-default" onclick="setMode(1.2,1.8)" style="flex:1;" type="button">📌 Padrão</button>
-        <button class="btn-agg" onclick="setMode(2,3)" type="button">⚡ Agressivo</button>
-      </div>
-
-      <button class="btn-scan" id="scanBtn" onclick="runScan()" type="button">
-        <span id="btnLabel">🤖 ESCANEAR MERCADO</span>
-        <span id="btnSpinner" class="spinner hidden"></span>
+    <!-- Symbol Selector -->
+    <div class="symbol-selector">
+      <select id="symbolSelect">
+        <option value="BTCUSDT">BTC/USDT</option>
+        <option value="ETHUSDT">ETH/USDT</option>
+        <option value="SOLUSDT">SOL/USDT</option>
+        <option value="BNBUSDT">BNB/USDT</option>
+        <option value="XRPUSDT">XRP/USDT</option>
+      </select>
+      <button class="btn-refresh" id="refreshBtn" onclick="refreshAllData()" type="button" title="Atualizar agora">
+        🔄
       </button>
     </div>
 
-    <!-- Signal -->
-    <div class="card" style="display:flex;flex-direction:column;gap:12px;">
-      <div class="card-title">📡 Sinal Atual</div>
+    <!-- Toggle Manual/Auto -->
+    <div class="price-mode-toggle">
+      <span class="toggle-label">Preço:</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="priceModeToggle">
+        <span class="toggle-slider"></span>
+      </label>
+      <span class="toggle-mode-text manual" id="modeText">🔧 MANUAL</span>
+    </div>
 
-      <div class="signal-box neutral" id="signalBox" role="status" aria-live="polite">
-        <div class="signal-icon" id="signalIcon" aria-hidden="true">⏳</div>
-        <div class="signal-text" id="signalText">AGUARDANDO</div>
-        <div class="signal-sub" id="signalSub">Clique em "Escanear Mercado"</div>
+    <!-- Price Input -->
+    <div class="field">
+      <label for="entryPrice">Preço de Entrada ($)</label>
+      <div class="price-input-wrapper">
+        <input type="number" id="entryPrice" value="67000" step="0.01" min="0" inputmode="decimal">
+        <span class="price-badge hidden" id="autoBadge">🔄 AUTO</span>
       </div>
+    </div>
 
-      <!-- Score -->
-      <div class="score-wrap">
-        <div class="score-arc" aria-label="Score de confluência">
-          <svg width="120" height="70" viewBox="0 0 120 70" role="img">
-            <title>Indicador de Score</title>
-            <path d="M10,65 A55,55 0 0,1 110,65" fill="none" stroke="#1a2433" stroke-width="8" stroke-linecap="round"/>
-            <path id="arcFill" d="M10,65 A55,55 0 0,1 110,65" fill="none" stroke="#00e5ff" stroke-width="8" stroke-linecap="round"
-              stroke-dasharray="0 173" style="transition:stroke-dasharray .6s ease, stroke .4s;"/>
-          </svg>
+    <!-- API Status -->
+    <div class="api-status hidden" id="apiStatus">
+      <div class="api-status-dot"></div>
+      <span id="apiStatusText">Binance API conectada</span>
+      <span class="api-timer" id="apiTimer">--s</span>
+    </div>
+
+    <div class="grid grid-2" style="gap:8px;">
+      <div class="field">
+        <label for="stopPct">Stop Loss (%)</label>
+        <input type="number" id="stopPct" value="1.2" step="0.1" min="0.1" inputmode="decimal">
+      </div>
+      <div class="field">
+        <label for="takePct">Take Profit (%)</label>
+        <input type="number" id="takePct" value="1.8" step="0.1" min="0.1" inputmode="decimal">
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-cons" onclick="setMode(.8,1.2)" type="button">🛡 Conservador</button>
+      <button class="btn-default" onclick="setMode(1.2,1.8)" style="flex:1;" type="button">📌 Padrão</button>
+      <button class="btn-agg" onclick="setMode(2,3)" type="button">⚡ Agressivo</button>
+    </div>
+
+    <button class="btn-scan" id="scanBtn" onclick="runScan()" type="button">
+      <span id="btnLabel">🤖 ESCANEAR MERCADO</span>
+      <span id="btnSpinner" class="spinner hidden"></span>
+    </button>
+  </div>
+
+  <!-- Row 2: Multi-Timeframe Signals -->
+  <div class="tf-signals-container">
+    
+    <!-- 1 Minute Signal -->
+    <div class="tf-card">
+      <div class="tf-header">
+        <span class="tf-title">⚡ 1 MINUTO</span>
+        <span class="tf-badge">SCALP RÁPIDO</span>
+      </div>
+      
+      <div class="signal-box neutral" id="signalBox1m" role="status">
+        <div class="signal-icon" id="signalIcon1m">⏳</div>
+        <div class="signal-text" id="signalText1m">AGUARDANDO</div>
+        <div class="signal-sub" id="signalSub1m">Score: --</div>
+        <div class="signal-tf">Timeframe: 1m</div>
+      </div>
+      
+      <div class="tf-indicators">
+        <div class="tf-ind-item">
+          <span class="tf-ind-label">RSI</span>
+          <span class="tf-ind-value" id="indRsi1m">--</span>
         </div>
-        <div class="score-num" id="scoreNum" style="color:var(--muted);">--</div>
-        <div class="score-label">Score de Confluência</div>
+        <div class="tf-ind-item">
+          <span class="tf-ind-label">VWAP</span>
+          <span class="tf-ind-value" id="indVwap1m">--</span>
+        </div>
+        <div class="tf-ind-item">
+          <span class="tf-ind-label">Tendência</span>
+          <span class="tf-ind-value" id="indTrend1m">--</span>
+        </div>
+        <div class="tf-ind-item">
+          <span class="tf-ind-label">Volatilidade</span>
+          <span class="tf-ind-value" id="indVol1m">--</span>
+        </div>
+      </div>
+      
+      <div class="tf-score-mini">
+        <div class="tf-score-bar">
+          <div class="tf-score-fill" id="scoreFill1m" style="width:0%"></div>
+        </div>
+        <span class="tf-score-text" id="scoreText1m">--</span>
+      </div>
+    </div>
+
+    <!-- 15 Minutes Signal -->
+    <div class="tf-card">
+      <div class="tf-header">
+        <span class="tf-title">📊 15 MINUTOS</span>
+        <span class="tf-badge">SCALP ESTRUTURADO</span>
+      </div>
+      
+      <div class="signal-box neutral" id="signalBox15m" role="status">
+        <div class="signal-icon" id="signalIcon15m">⏳</div>
+        <div class="signal-text" id="signalText15m">AGUARDANDO</div>
+        <div class="signal-sub" id="signalSub15m">Score: --</div>
+        <div class="signal-tf">Timeframe: 15m</div>
+      </div>
+      
+      <div class="tf-indicators">
+        <div class="tf-ind-item">
+          <span class="tf-ind-label">RSI</span>
+          <span class="tf-ind-value" id="indRsi15m">--</span>
+        </div>
+        <div class="tf-ind-item">
+          <span class="tf-ind-label">VWAP</span>
+          <span class="tf-ind-value" id="indVwap15m">--</span>
+        </div>
+        <div class="tf-ind-item">
+          <span class="tf-ind-label">Tendência</span>
+          <span class="tf-ind-value" id="indTrend15m">--</span>
+        </div>
+        <div class="tf-ind-item">
+          <span class="tf-ind-label">Volatilidade</span>
+          <span class="tf-ind-value" id="indVol15m">--</span>
+        </div>
+      </div>
+      
+      <div class="tf-score-mini">
+        <div class="tf-score-bar">
+          <div class="tf-score-fill" id="scoreFill15m" style="width:0%"></div>
+        </div>
+        <span class="tf-score-text" id="scoreText15m">--</span>
       </div>
     </div>
   </div>
 
-  <!-- Row 2: Targets + Indicators -->
-  <div class="grid grid-2" style="margin-bottom:12px;">
+  <!-- Confluence Alert -->
+  <div class="confluence-alert neutral" id="confluenceAlert">
+    <span id="confluenceIcon">⚪</span>
+    <span id="confluenceText">Aguardando análise dos timeframes...</span>
+  </div>
 
-    <!-- Targets -->
-    <div class="card">
-      <div class="card-title">💰 Alvos Calculados</div>
+  <!-- Row 3: Targets -->
+  <div class="card" style="margin-bottom:12px;">
+    <div class="card-title">💰 Alvos Calculados</div>
 
-      <div class="metric">
-        <span class="metric-label">Preço de Entrada</span>
-        <span class="metric-value val-blue" id="dispEntry">$0.00</span>
-      </div>
-      <div class="metric">
-        <span class="metric-label">🔴 Stop Loss</span>
-        <span class="metric-value val-red" id="dispStop">$0.00</span>
-      </div>
-      <div class="metric">
-        <span class="metric-label">🟢 Take Profit</span>
-        <span class="metric-value val-green" id="dispTake">$0.00</span>
-      </div>
-      <div class="metric">
-        <span class="metric-label">Risco / Retorno</span>
-        <span class="metric-value val-yellow" id="dispRR">0 : 0</span>
-      </div>
-
-      <div class="rr-bar-wrap">
-        <div style="font-size:.72rem;color:var(--text2);">Visualização R/R</div>
-        <div class="rr-bar-track" role="progressbar" aria-label="Proporção Risco/Retorno">
-          <div class="rr-bar-stop" id="rrStop" style="width:40%;"></div>
-          <div class="rr-bar-take" id="rrTake" style="width:60%;"></div>
-        </div>
-        <div class="rr-labels"><span>RISCO</span><span>RETORNO</span></div>
-      </div>
+    <div class="metric">
+      <span class="metric-label">Preço de Entrada</span>
+      <span class="metric-value val-blue" id="dispEntry">$0.00</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">🔴 Stop Loss</span>
+      <span class="metric-value val-red" id="dispStop">$0.00</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">🟢 Take Profit</span>
+      <span class="metric-value val-green" id="dispTake">$0.00</span>
+    </div>
+    <div class="metric">
+      <span class="metric-label">Risco / Retorno</span>
+      <span class="metric-value val-yellow" id="dispRR">0 : 0</span>
     </div>
 
-    <!-- Indicators -->
-    <div class="card">
-      <div class="card-title">📊 Indicadores</div>
-
-      <div class="ind-row">
-        <span class="ind-name">RSI (14)</span>
-        <span class="ind-val" id="indRsi" style="color:var(--muted)">--</span>
-        <span class="ind-badge badge-neu" id="badgeRsi">--</span>
+    <div class="rr-bar-wrap">
+      <div style="font-size:.72rem;color:var(--text2);">Visualização R/R</div>
+      <div class="rr-bar-track">
+        <div class="rr-bar-stop" id="rrStop" style="width:40%;"></div>
+        <div class="rr-bar-take" id="rrTake" style="width:60%;"></div>
       </div>
-      <div class="ind-row">
-        <span class="ind-name">VWAP</span>
-        <span class="ind-val" id="indVwap" style="color:var(--muted)">--</span>
-        <span class="ind-badge badge-neu" id="badgeVwap">--</span>
-      </div>
-      <div class="ind-row">
-        <span class="ind-name">Tendência</span>
-        <span class="ind-val" id="indTrend" style="color:var(--muted)">--</span>
-        <span class="ind-badge badge-neu" id="badgeTrend">--</span>
-      </div>
-      <div class="ind-row">
-        <span class="ind-name">Volatilidade</span>
-        <span class="ind-val" id="indVol" style="color:var(--muted)">--</span>
-        <span class="ind-badge badge-neu" id="badgeVol">--</span>
-      </div>
-      <div class="ind-row">
-        <span class="ind-name">Momentum</span>
-        <span class="ind-val" id="indMom" style="color:var(--muted)">--</span>
-        <span class="ind-badge badge-neu" id="badgeMom">--</span>
-      </div>
-      
-      <div class="hint-box">
-        💡 Clique em <strong>"🤖 ESCANEAR MERCADO"</strong> para analisar os indicadores em tempo real
-      </div>
+      <div class="rr-labels"><span>RISCO</span><span>RETORNO</span></div>
     </div>
   </div>
 
@@ -844,15 +1002,15 @@
   <div class="card">
     <div class="card-title">📋 Log de Sinais</div>
     <div id="logList" role="log" aria-live="polite">
-      <div class="log-entry"><span class="log-time">--:--:--</span><span class="log-msg neu">Sistema iniciado. Aguardando análise...</span></div>
+      <div class="log-entry"><span class="log-time">--:--:--</span><span class="log-msg info">Sistema iniciado. Multi-timeframe pronto.</span></div>
     </div>
   </div>
 
   <!-- Footer Disclaimer -->
   <div class="footer-disclaimer">
-    🔐 <strong>Disclaimer Educativo:</strong> ScalpCalc é uma ferramenta de estudo e simulação.<br>
-    Criptomoedas são ativos de alta volatilidade e risco. Nunca opere com capital que não pode perder.<br>
-    Este software <strong>não constitui</strong> recomendação financeira, consultoria ou aconselhamento de investimento.
+    🔐 <strong>Disclaimer:</strong> ScalpCalc é ferramenta educativa de simulação.<br>
+    Criptomoedas são ativos de alto risco. Nunca opere com capital que não pode perder.<br>
+    Este software não constitui recomendação financeira.
   </div>
 
 </div>
@@ -869,46 +1027,67 @@ let autoUpdateInterval = null;
 let countdownInterval = null;
 let countdown = 10;
 
+// Store for timeframe data
+const tfData = {
+  '1m': { indicators: null, signal: null, score: null, lastUpdate: null },
+  '15m': { indicators: null, signal: null, score: null, lastUpdate: null }
+};
+
 // ─────────────────────────────────────────────
 //  BINANCE API INTEGRATION
 // ─────────────────────────────────────────────
 async function fetchBinancePrice() {
   const symbol = $('symbolSelect').value;
-  const refreshBtn = $('refreshBtn');
   
   try {
-    refreshBtn.disabled = true;
-    showApiStatus('loading', 'Atualizando...');
-    
     const response = await fetch(`${BINANCE_API}/ticker/price?symbol=${symbol}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     
     const data = await response.json();
-    const price = parseFloat(data.price);
-    
-    // Update price input
-    $('entryPrice').value = price.toFixed(2);
-    recalc();
-    
-    showApiStatus('success', `Binance API • ${symbol}`);
-    addLogEntry('INFO', price, null, `Preço atualizado: $${price.toLocaleString('en-US', {minimumFractionDigits: 2})}`);
-    
-    // Reset countdown
-    countdown = 10;
+    return parseFloat(data.price);
     
   } catch (error) {
-    console.error('❌ Binance API Error:', error);
-    showApiStatus('error', 'Erro na API Binance');
-    addLogEntry('ERROR', 0, null, `Falha ao buscar preço: ${error.message}`);
-  } finally {
-    refreshBtn.disabled = false;
+    console.error('❌ Binance price error:', error);
+    throw error;
   }
+}
+
+async function fetchBinanceKlines(symbol, interval, limit = 50) {
+  try {
+    const response = await fetch(`${BINANCE_API}/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    
+    const klines = await response.json();
+    
+    // Parse klines: [time, open, high, low, close, volume, ...]
+    return {
+      prices: klines.map(k => parseFloat(k[4])), // close price
+      volumes: klines.map(k => parseFloat(k[5])),
+      highs: klines.map(k => parseFloat(k[2])),
+      lows: klines.map(k => parseFloat(k[3])),
+      timestamps: klines.map(k => k[0])
+    };
+    
+  } catch (error) {
+    console.error(`❌ Binance klines error (${interval}):`, error);
+    throw error;
+  }
+}
+
+async function fetchAllTimeframeData(symbol) {
+  // Fetch both timeframes in parallel
+  const [price, data1m, data15m] = await Promise.all([
+    fetchBinancePrice(),
+    fetchBinanceKlines(symbol, '1m'),
+    fetchBinanceKlines(symbol, '15m')
+  ]);
+  
+  return { price, data1m, data15m };
 }
 
 function showApiStatus(status, text) {
   const statusEl = $('apiStatus');
   const statusText = $('apiStatusText');
-  const statusDot = statusEl.querySelector('.api-status-dot');
   
   statusEl.classList.remove('hidden', 'error');
   statusText.textContent = text;
@@ -919,20 +1098,16 @@ function showApiStatus(status, text) {
 }
 
 function startAutoUpdate() {
-  // Clear existing intervals
   if (autoUpdateInterval) clearInterval(autoUpdateInterval);
   if (countdownInterval) clearInterval(countdownInterval);
   
-  // Fetch immediately
-  fetchBinancePrice();
+  refreshAllData();
   
-  // Update every 10 seconds
   autoUpdateInterval = setInterval(() => {
-    fetchBinancePrice();
+    refreshAllData();
     countdown = 10;
   }, 10000);
   
-  // Countdown timer
   countdownInterval = setInterval(() => {
     countdown--;
     $('apiTimer').textContent = `${countdown}s`;
@@ -941,19 +1116,13 @@ function startAutoUpdate() {
 }
 
 function stopAutoUpdate() {
-  if (autoUpdateInterval) {
-    clearInterval(autoUpdateInterval);
-    autoUpdateInterval = null;
-  }
-  if (countdownInterval) {
-    clearInterval(countdownInterval);
-    countdownInterval = null;
-  }
+  if (autoUpdateInterval) clearInterval(autoUpdateInterval);
+  if (countdownInterval) clearInterval(countdownInterval);
   $('apiTimer').textContent = '--s';
 }
 
 // ─────────────────────────────────────────────
-//  PRICE MODE TOGGLE (MANUAL/AUTO)
+//  PRICE MODE TOGGLE
 // ─────────────────────────────────────────────
 function setupPriceModeToggle() {
   const toggle = $('priceModeToggle');
@@ -961,13 +1130,10 @@ function setupPriceModeToggle() {
   const modeText = $('modeText');
   const autoBadge = $('autoBadge');
   
-  // Load saved preference
   const savedMode = localStorage.getItem('scalpcalc_priceMode');
   const savedSymbol = localStorage.getItem('scalpcalc_symbol');
   
-  if (savedSymbol) {
-    $('symbolSelect').value = savedSymbol;
-  }
+  if (savedSymbol) $('symbolSelect').value = savedSymbol;
   
   if (savedMode === 'auto') {
     toggle.checked = true;
@@ -986,68 +1152,370 @@ function setupPriceModeToggle() {
     stopAutoUpdate();
   }
   
-  // Toggle handler
   toggle.addEventListener('change', (e) => {
     if (e.target.checked) {
-      // Switch to AUTO
       modeText.textContent = '🔄 AUTO';
       modeText.className = 'toggle-mode-text auto';
       entryPrice.disabled = true;
       autoBadge.classList.remove('hidden');
       $('apiStatus').classList.remove('hidden');
-      
-      // Save preference
       localStorage.setItem('scalpcalc_priceMode', 'auto');
-      
-      // Start auto update
       startAutoUpdate();
-      
-      addLogEntry('INFO', 0, null, 'Modo AUTOMÁTICO ativado • Preço da Binance');
+      addLogEntry('INFO', 0, null, '[SISTEMA] Modo AUTOMÁTICO ativado');
     } else {
-      // Switch to MANUAL
       modeText.textContent = '🔧 MANUAL';
       modeText.className = 'toggle-mode-text manual';
       entryPrice.disabled = false;
       autoBadge.classList.add('hidden');
       $('apiStatus').classList.add('hidden');
-      
-      // Save preference
       localStorage.setItem('scalpcalc_priceMode', 'manual');
-      
-      // Stop auto update
       stopAutoUpdate();
-      
-      addLogEntry('INFO', 0, null, 'Modo MANUAL ativado');
+      addLogEntry('INFO', 0, null, '[SISTEMA] Modo MANUAL ativado');
     }
     entryPrice.focus();
   });
   
-  // Symbol change handler
   $('symbolSelect').addEventListener('change', () => {
     localStorage.setItem('scalpcalc_symbol', $('symbolSelect').value);
-    if (toggle.checked) {
-      fetchBinancePrice();
-    }
-    addLogEntry('INFO', 0, null, `Par alterado para: ${$('symbolSelect').value}`);
+    if (toggle.checked) refreshAllData();
+    addLogEntry('INFO', 0, null, `[SISTEMA] Par: ${$('symbolSelect').value}`);
   });
 }
 
 // ─────────────────────────────────────────────
-//  CÁLCULOS DE PREÇO E R/R
+//  INDICATOR CALCULATIONS
+// ─────────────────────────────────────────────
+function calculateRSI(prices, period = 14) {
+  if (prices.length < period + 1) return 50;
+  
+  let gains = 0, losses = 0;
+  for (let i = prices.length - period; i < prices.length; i++) {
+    const diff = prices[i] - prices[i - 1];
+    if (diff >= 0) gains += diff;
+    else losses -= diff;
+  }
+  
+  const avgGain = gains / period;
+  const avgLoss = losses / period;
+  if (avgLoss === 0) return 100;
+  
+  const rs = avgGain / avgLoss;
+  return parseFloat((100 - (100 / (1 + rs))).toFixed(1));
+}
+
+function calculateVWAP(data) {
+  let cumulativeTPV = 0, cumulativeVol = 0;
+  
+  for (let i = 0; i < data.prices.length; i++) {
+    const typicalPrice = (data.highs[i] + data.lows[i] + data.prices[i]) / 3;
+    cumulativeTPV += typicalPrice * data.volumes[i];
+    cumulativeVol += data.volumes[i];
+  }
+  
+  return cumulativeVol > 0 ? parseFloat((cumulativeTPV / cumulativeVol).toFixed(2)) : null;
+}
+
+function calculateTrend(prices, shortPeriod = 9, longPeriod = 21) {
+  if (prices.length < longPeriod) return 'LATERAL';
+  
+  const shortMA = prices.slice(-shortPeriod).reduce((a, b) => a + b, 0) / shortPeriod;
+  const longMA = prices.slice(-longPeriod).reduce((a, b) => a + b, 0) / longPeriod;
+  const diff = (shortMA - longMA) / longMA * 100;
+  
+  if (diff > 0.5) return 'ALTA';
+  if (diff < -0.5) return 'BAIXA';
+  return 'LATERAL';
+}
+
+function calculateVolatility(prices, period = 14) {
+  if (prices.length < period) return 'MÉDIA';
+  
+  const slice = prices.slice(-period);
+  const mean = slice.reduce((a, b) => a + b, 0) / period;
+  const variance = slice.reduce((sum, p) => sum + Math.pow(p - mean, 2), 0) / period;
+  const stdDev = Math.sqrt(variance);
+  const cv = (stdDev / mean) * 100;
+  
+  if (cv < 1) return 'BAIXA';
+  if (cv > 3) return 'ALTA';
+  return 'MÉDIA';
+}
+
+function calculateMomentum(prices, period = 10) {
+  if (prices.length < period) return 0;
+  const current = prices[prices.length - 1];
+  const past = prices[prices.length - period];
+  return parseFloat(((current - past) / past * 100).toFixed(2));
+}
+
+function calculateIndicators(data, entryPrice) {
+  return {
+    rsi: calculateRSI(data.prices),
+    vwap: calculateVWAP(data),
+    trend: calculateTrend(data.prices),
+    volatility: calculateVolatility(data.prices),
+    momentum: calculateMomentum(data.prices),
+    currentPrice: data.prices[data.prices.length - 1]
+  };
+}
+
+// ─────────────────────────────────────────────
+//  SCORE & SIGNAL LOGIC
+// ─────────────────────────────────────────────
+function calculateConfluenceScore(ind, entryPrice) {
+  let score = 50;
+  
+  // RSI weighting
+  if (ind.rsi < 30) score += 25;
+  else if (ind.rsi < 45) score += 12;
+  else if (ind.rsi > 70) score -= 25;
+  else if (ind.rsi > 55) score -= 12;
+  
+  // VWAP weighting
+  if (entryPrice < ind.vwap * 0.995) score += 15;
+  else if (entryPrice > ind.vwap * 1.005) score -= 15;
+  
+  // Trend weighting
+  if (ind.trend === 'ALTA') score += 20;
+  else if (ind.trend === 'BAIXA') score -= 20;
+  
+  // Volatility adjustment
+  if (ind.volatility === 'ALTA') score = Math.floor(score * 0.92);
+  else if (ind.volatility === 'BAIXA') score = Math.floor(score * 1.04);
+  
+  // Momentum
+  score += Math.round(ind.momentum * 10);
+  
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+function determineSignal(ind, score) {
+  if (score >= 72 && ind.rsi < 52 && ind.trend !== 'BAIXA') return 'BUY';
+  if (score <= 28 && ind.rsi > 48 && ind.trend !== 'ALTA') return 'SELL';
+  return 'NEUTRAL';
+}
+
+function analyzeConfluence(signal1m, signal15m, score1m, score15m) {
+  if (signal1m === signal15m && signal1m !== 'NEUTRAL') {
+    return {
+      type: 'confluence',
+      icon: '✅',
+      text: `CONFLUÊNCIA FORTE: ${signal1m === 'BUY' ? '🟢 COMPRA' : '🔴 VENDA'} em ambos timeframes`,
+      strength: Math.round((score1m + score15m) / 2)
+    };
+  }
+  if (signal1m !== signal15m && signal1m !== 'NEUTRAL' && signal15m !== 'NEUTRAL') {
+    return {
+      type: 'conflict',
+      icon: '⚠️',
+      text: `CONFLITO: 1min ${signal1m} • 15min ${signal15m} → Aguardar confirmação`,
+      strength: null
+    };
+  }
+  return {
+    type: 'neutral',
+    icon: '⚪',
+    text: 'Análise mista ou neutra → Operar com cautela',
+    strength: null
+  };
+}
+
+// ─────────────────────────────────────────────
+//  UI UPDATE FUNCTIONS
+// ─────────────────────────────────────────────
+function updateTFSignalUI(tf, signal, score, indicators) {
+  const prefix = tf === '1m' ? '' : '15m';
+  const signalBox = $(`signalBox${prefix}`);
+  const icon = $(`signalIcon${prefix}`);
+  const text = $(`signalText${prefix}`);
+  const sub = $(`signalSub${prefix}`);
+  const scoreFill = $(`scoreFill${prefix}`);
+  const scoreText = $(`scoreText${prefix}`);
+  
+  // Update indicators
+  $(`indRsi${prefix}`).textContent = indicators.rsi;
+  $(`indVwap${prefix}`).textContent = '$' + indicators.vwap?.toLocaleString('en-US', {minimumFractionDigits:0});
+  $(`indTrend${prefix}`).textContent = indicators.trend;
+  $(`indVol${prefix}`).textContent = indicators.volatility;
+  
+  // Update signal box
+  signalBox.className = 'signal-box ' + (signal === 'BUY' ? 'buy' : signal === 'SELL' ? 'sell' : 'neutral');
+  icon.textContent = signal === 'BUY' ? '🟢' : signal === 'SELL' ? '🔴' : '🟡';
+  text.textContent = signal === 'BUY' ? 'COMPRA' : signal === 'SELL' ? 'VENDA' : 'AGUARDAR';
+  sub.textContent = `Score: ${score}/100`;
+  
+  // Update score bar
+  scoreFill.style.width = `${score}%`;
+  scoreFill.style.background = signal === 'BUY' ? 'var(--green)' : signal === 'SELL' ? 'var(--red)' : 'var(--yellow)';
+  scoreText.textContent = score;
+  scoreText.style.color = scoreFill.style.background;
+}
+
+function updateConfluenceAlert(analysis) {
+  const alert = $('confluenceAlert');
+  const icon = $('confluenceIcon');
+  const text = $('confluenceText');
+  
+  alert.className = 'confluence-alert ' + analysis.type;
+  icon.textContent = analysis.icon;
+  text.textContent = analysis.text;
+}
+
+function showLoadingState(tf = null) {
+  const prefixes = tf ? [tf === '1m' ? '' : '15m'] : ['', '15m'];
+  
+  prefixes.forEach(prefix => {
+    $(`indRsi${prefix}`).textContent = '...';
+    $(`indVwap${prefix}`).textContent = '...';
+    $(`indTrend${prefix}`).textContent = '...';
+    $(`indVol${prefix}`).textContent = '...';
+    $(`signalIcon${prefix}`).textContent = '🔄';
+    $(`signalText${prefix}`).textContent = 'ANALISANDO';
+    $(`signalSub${prefix}`).textContent = 'Score: --';
+    $(`scoreFill${prefix}`).style.width = '0%';
+    $(`scoreText${prefix}`).textContent = '--';
+  });
+}
+
+// ─────────────────────────────────────────────
+//  MAIN SCAN FUNCTION
+// ─────────────────────────────────────────────
+async function refreshAllData() {
+  const symbol = $('symbolSelect').value;
+  const refreshBtn = $('refreshBtn');
+  
+  try {
+    refreshBtn.disabled = true;
+    showApiStatus('loading', 'Atualizando dados...');
+    showLoadingState();
+    
+    // Fetch data from Binance
+    const { price, data1m, data15m } = await fetchAllTimeframeData(symbol);
+    
+    // Update price if in auto mode
+    if ($('priceModeToggle').checked) {
+      $('entryPrice').value = price.toFixed(2);
+      recalc();
+    }
+    
+    // Calculate indicators for both timeframes
+    const entryPrice = parseFloat($('entryPrice').value) || price;
+    
+    const ind1m = calculateIndicators(data1m, entryPrice);
+    const ind15m = calculateIndicators(data15m, entryPrice);
+    
+    // Calculate scores and signals
+    const score1m = calculateConfluenceScore(ind1m, entryPrice);
+    const score15m = calculateConfluenceScore(ind15m, entryPrice);
+    
+    const signal1m = determineSignal(ind1m, score1m);
+    const signal15m = determineSignal(ind15m, score15m);
+    
+    // Store data
+    tfData['1m'] = { indicators: ind1m, signal: signal1m, score: score1m, lastUpdate: Date.now() };
+    tfData['15m'] = { indicators: ind15m, signal: signal15m, score: score15m, lastUpdate: Date.now() };
+    
+    // Update UI
+    updateTFSignalUI('1m', signal1m, score1m, ind1m);
+    updateTFSignalUI('15m', signal15m, score15m, ind15m);
+    
+    // Analyze confluence
+    const confluence = analyzeConfluence(signal1m, signal15m, score1m, score15m);
+    updateConfluenceAlert(confluence);
+    
+    // Update log
+    addLogEntry(signal1m, entryPrice, score1m, '[1min]');
+    addLogEntry(signal15m, entryPrice, score15m, '[15min]');
+    
+    showApiStatus('success', `Binance • ${symbol}`);
+    countdown = 10;
+    
+  } catch (error) {
+    console.error('❌ Error refreshing data:', error);
+    showApiStatus('error', 'Erro na API Binance');
+    addLogEntry('ERROR', 0, 0, `[SISTEMA] Falha: ${error.message}`);
+  } finally {
+    refreshBtn.disabled = false;
+  }
+}
+
+async function runScan() {
+  const btn = $('scanBtn');
+  const btnLabel = $('btnLabel');
+  const btnSpinner = $('btnSpinner');
+  
+  btn.disabled = true;
+  btnLabel.classList.add('hidden');
+  btnSpinner.classList.remove('hidden');
+  
+  try {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // If in auto mode and no data yet, fetch from API
+    if ($('priceModeToggle').checked && !tfData['1m'].indicators) {
+      await refreshAllData();
+    }
+    
+    // Use stored data or simulate if not available
+    const entryPrice = parseFloat($('entryPrice').value) || 67000;
+    
+    // If we have real data, use it; otherwise simulate
+    if (tfData['1m'].indicators && tfData['15m'].indicators) {
+      // Already updated by refreshAllData
+    } else {
+      // Simulate for demo purposes
+      const ind1m = { rsi: 28 + Math.random()*44, vwap: entryPrice*0.998, trend: 'ALTA', volatility: 'MÉDIA', momentum: 0.3 };
+      const ind15m = { rsi: 45 + Math.random()*30, vwap: entryPrice*1.002, trend: 'LATERAL', volatility: 'BAIXA', momentum: -0.1 };
+      
+      const score1m = calculateConfluenceScore(ind1m, entryPrice);
+      const score15m = calculateConfluenceScore(ind15m, entryPrice);
+      const signal1m = determineSignal(ind1m, score1m);
+      const signal15m = determineSignal(ind15m, score15m);
+      
+      updateTFSignalUI('1m', signal1m, score1m, ind1m);
+      updateTFSignalUI('15m', signal15m, score15m, ind15m);
+      updateConfluenceAlert(analyzeConfluence(signal1m, signal15m, score1m, score15m));
+      
+      addLogEntry(signal1m, entryPrice, score1m, '[1min]');
+      addLogEntry(signal15m, entryPrice, score15m, '[15min]');
+    }
+    
+    recalc();
+    
+    // Haptic feedback for strong signals
+    const s1m = tfData['1m'].signal, s15m = tfData['15m'].signal;
+    if ((s1m === 'BUY' && s15m === 'BUY') || (s1m === 'SELL' && s15m === 'SELL')) {
+      triggerHaptic([20, 30, 20, 30, 20]);
+    }
+    
+  } catch (error) {
+    console.error('❌ Scan error:', error);
+    addLogEntry('ERROR', 0, 0, '[SCAN] Falha na análise');
+  } finally {
+    setTimeout(() => {
+      btn.disabled = false;
+      btnLabel.classList.remove('hidden');
+      btnSpinner.classList.add('hidden');
+    }, 250);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  PRICE CALCULATIONS
 // ─────────────────────────────────────────────
 function recalc() {
-  const entry   = parseFloat($('entryPrice').value) || 0;
-  const stopPct = parseFloat($('stopPct').value)    || 1.2;
-  const takePct = parseFloat($('takePct').value)    || 1.8;
+  const entry = parseFloat($('entryPrice').value) || 0;
+  const stopPct = parseFloat($('stopPct').value) || 1.2;
+  const takePct = parseFloat($('takePct').value) || 1.8;
 
   const stopPrice = entry * (1 - stopPct / 100);
   const takePrice = entry * (1 + takePct / 100);
   const rr = stopPct > 0 ? (takePct / stopPct).toFixed(2) : '∞';
 
-  $('dispEntry').textContent = '$' + entry.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-  $('dispStop').textContent  = '$' + stopPrice.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-  $('dispTake').textContent  = '$' + takePrice.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-  $('dispRR').textContent    = '1 : ' + rr;
+  $('dispEntry').textContent = '$' + entry.toLocaleString('en-US', {minimumFractionDigits:2});
+  $('dispStop').textContent = '$' + stopPrice.toLocaleString('en-US', {minimumFractionDigits:2});
+  $('dispTake').textContent = '$' + takePrice.toLocaleString('en-US', {minimumFractionDigits:2});
+  $('dispRR').textContent = '1 : ' + rr;
 
   const total = stopPct + takePct;
   if (total > 0) {
@@ -1062,7 +1530,6 @@ function setMode(stop, take) {
   recalc();
 }
 
-// Event listeners para recalcular ao digitar
 ['entryPrice','stopPct','takePct'].forEach(id => {
   const el = $(id);
   if (el) {
@@ -1072,367 +1539,7 @@ function setMode(stop, take) {
 });
 
 // ─────────────────────────────────────────────
-//  FUNÇÃO PRINCIPAL: runScan()
-// ─────────────────────────────────────────────
-async function runScan() {
-  const btn = $('scanBtn');
-  const btnLabel = $('btnLabel');
-  const btnSpinner = $('btnSpinner');
-  
-  // Desabilitar botão durante análise
-  btn.disabled = true;
-  btnLabel.classList.add('hidden');
-  btnSpinner.classList.remove('hidden');
-  
-  // Mostrar loading nos indicadores
-  showLoadingState();
-  
-  // Feedback visual nos cards
-  document.querySelectorAll('.card').forEach(card => {
-    card.style.opacity = '0.85';
-    card.style.transition = 'opacity .2s ease';
-  });
-
-  try {
-    const entryPrice = parseFloat($('entryPrice').value) || 67000;
-    const isAutoMode = $('priceModeToggle').checked;
-    
-    // Simular delay de rede (remover ao usar API real)
-    await new Promise(resolve => setTimeout(resolve, 700));
-    
-    // Buscar indicadores (simulado ou API)
-    const indicators = await fetchIndicators(entryPrice);
-    
-    // Calcular score e sinal
-    const score = calculateConfluenceScore(indicators, entryPrice);
-    const signal = determineSignal(indicators, score);
-    
-    // Atualizar UI
-    updateIndicatorsUI(indicators);
-    updateSignalUI(signal, score);
-    updateScoreArc(score, signal);
-    addLogEntry(signal, entryPrice, score, isAutoMode ? '[AUTO]' : '[MANUAL]');
-    
-    // Recalcular alvos
-    recalc();
-    
-    // Feedback háptico se suportado
-    if (signal === 'BUY' || signal === 'SELL') {
-      triggerHaptic(signal === 'BUY' ? [15, 30, 15] : [40, 20, 40]);
-    }
-    
-  } catch (error) {
-    console.error('❌ Erro no scan:', error);
-    $('signalIcon').textContent = '⚠️';
-    $('signalText').textContent = 'ERRO';
-    $('signalSub').textContent = 'Falha na análise. Tente novamente.';
-    addLogEntry('ERROR', 0, 0, 'Erro ao processar dados');
-    
-  } finally {
-    // Restaurar UI após pequeno delay
-    setTimeout(() => {
-      btn.disabled = false;
-      btnLabel.classList.remove('hidden');
-      btnSpinner.classList.add('hidden');
-      
-      document.querySelectorAll('.card').forEach(card => {
-        card.style.opacity = '1';
-      });
-    }, 250);
-  }
-}
-
-// ─────────────────────────────────────────────
-//  BUSCA DE INDICADORES (SIMULAÇÃO REALISTA)
-// ─────────────────────────────────────────────
-async function fetchIndicators(entryPrice) {
-  // 🔄 MODO SIMULAÇÃO (padrão atual)
-  // Para produção: substitua por fetch real da API
-  
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Simular comportamento de mercado mais realista
-      const marketBias = Math.random() > 0.5 ? 1 : -1;
-      const noise = () => (Math.random() - 0.5) * 10;
-      
-      // RSI com viés de mercado
-      const rsiBase = 50 + (marketBias * 18) + noise();
-      const rsi = Math.max(20, Math.min(80, rsiBase));
-      
-      // VWAP próximo ao preço de entrada
-      const vwapDeviation = ((Math.random() - 0.5) * 0.025 * marketBias);
-      const vwap = entryPrice * (1 + vwapDeviation);
-      
-      // Tendência com pesos
-      const trendRoll = Math.random();
-      const trend = trendRoll < 0.35 ? 'BAIXA' : trendRoll < 0.75 ? 'ALTA' : 'LATERAL';
-      
-      // Volatilidade
-      const volRoll = Math.random();
-      const vol = volRoll < 0.25 ? 'BAIXA' : volRoll < 0.7 ? 'MÉDIA' : 'ALTA';
-      
-      // Momentum correlacionado com RSI
-      const mom = ((rsi - 50) / 45) + (Math.random() * 0.5 - 0.25);
-      
-      resolve({
-        rsi: parseFloat(rsi.toFixed(1)),
-        vwap: parseFloat(vwap.toFixed(2)),
-        trend,
-        vol,
-        mom: parseFloat(mom.toFixed(2)),
-        price: entryPrice
-      });
-    }, 600);
-  });
-}
-
-// ─────────────────────────────────────────────
-//  CÁLCULO DE SCORE DE CONFLUÊNCIA (0-100)
-// ─────────────────────────────────────────────
-function calculateConfluenceScore(ind, entryPrice) {
-  let score = 50; // Base neutra
-  
-  // 📊 RSI: ±25 pontos
-  if (ind.rsi < 30) score += 25;           // Oversold → Bullish
-  else if (ind.rsi < 45) score += 12;      // Levemente oversold
-  else if (ind.rsi > 70) score -= 25;      // Overbought → Bearish
-  else if (ind.rsi > 55) score -= 12;      // Levemente overbought
-  
-  // 📈 VWAP: ±15 pontos
-  if (entryPrice < ind.vwap * 0.995) score += 15;
-  else if (entryPrice > ind.vwap * 1.005) score -= 15;
-  
-  // 🧭 Tendência: ±20 pontos
-  if (ind.trend === 'ALTA') score += 20;
-  else if (ind.trend === 'BAIXA') score -= 20;
-  
-  // 🌊 Volatilidade: ajuste de risco
-  if (ind.vol === 'ALTA') score = Math.floor(score * 0.92);
-  else if (ind.vol === 'BAIXA') score = Math.floor(score * 1.04);
-  
-  // ⚡ Momentum: ±10 pontos
-  score += Math.round(ind.mom * 10);
-  
-  // Clamp entre 0 e 100
-  return Math.max(0, Math.min(100, Math.round(score)));
-}
-
-// ─────────────────────────────────────────────
-//  DETERMINAÇÃO DO SINAL
-// ─────────────────────────────────────────────
-function determineSignal(ind, score) {
-  // Regras de confirmação múltipla para reduzir falsos sinais
-  
-  if (score >= 72) {
-    // BUY: precisa de RSI favorável e tendência não-baixista
-    if (ind.rsi < 52 && ind.trend !== 'BAIXA') return 'BUY';
-  }
-  
-  if (score <= 28) {
-    // SELL: precisa de RSI favorável e tendência não-altista
-    if (ind.rsi > 48 && ind.trend !== 'ALTA') return 'SELL';
-  }
-  
-  // Zona neutra ou sem confirmação suficiente
-  return 'NEUTRAL';
-}
-
-// ─────────────────────────────────────────────
-//  ATUALIZAÇÃO DA UI - INDICADORES
-// ─────────────────────────────────────────────
-function updateIndicatorsUI(ind) {
-  // RSI
-  const rsiEl = $('indRsi');
-  const rsiBadge = $('badgeRsi');
-  rsiEl.textContent = ind.rsi;
-  
-  if (ind.rsi < 30) {
-    rsiBadge.textContent = 'COMPRA';
-    rsiBadge.className = 'ind-badge badge-buy';
-    rsiEl.style.color = 'var(--green)';
-  } else if (ind.rsi > 70) {
-    rsiBadge.textContent = 'VENDA';
-    rsiBadge.className = 'ind-badge badge-sell';
-    rsiEl.style.color = 'var(--red)';
-  } else {
-    rsiBadge.textContent = 'NEUTRO';
-    rsiBadge.className = 'ind-badge badge-neu';
-    rsiEl.style.color = 'var(--text)';
-  }
-  
-  // VWAP
-  const vwapEl = $('indVwap');
-  const vwapBadge = $('badgeVwap');
-  const entry = parseFloat($('entryPrice').value) || ind.price;
-  vwapEl.textContent = '$' + ind.vwap.toLocaleString('en-US', {minimumFractionDigits: 2});
-  
-  if (entry < ind.vwap * 0.998) {
-    vwapBadge.textContent = 'ABAIXO';
-    vwapBadge.className = 'ind-badge badge-buy';
-  } else if (entry > ind.vwap * 1.002) {
-    vwapBadge.textContent = 'ACIMA';
-    vwapBadge.className = 'ind-badge badge-sell';
-  } else {
-    vwapBadge.textContent = 'NA VWAP';
-    vwapBadge.className = 'ind-badge badge-neu';
-  }
-  
-  // Tendência
-  const trendEl = $('indTrend');
-  const trendBadge = $('badgeTrend');
-  trendEl.textContent = ind.trend;
-  
-  if (ind.trend === 'ALTA') {
-    trendBadge.textContent = '🟢';
-    trendBadge.className = 'ind-badge badge-buy';
-  } else if (ind.trend === 'BAIXA') {
-    trendBadge.textContent = '🔴';
-    trendBadge.className = 'ind-badge badge-sell';
-  } else {
-    trendBadge.textContent = '🟡';
-    trendBadge.className = 'ind-badge badge-neu';
-  }
-  
-  // Volatilidade
-  const volEl = $('indVol');
-  const volBadge = $('badgeVol');
-  volEl.textContent = ind.vol;
-  volBadge.textContent = ind.vol === 'ALTA' ? '⚠️' : ind.vol === 'BAIXA' ? '✓' : '•';
-  volBadge.className = 'ind-badge badge-neu';
-  
-  // Momentum
-  const momEl = $('indMom');
-  const momBadge = $('badgeMom');
-  momEl.textContent = ind.mom > 0 ? '+' + ind.mom : ind.mom;
-  
-  if (ind.mom > 0.35) {
-    momBadge.textContent = 'FORTE';
-    momBadge.className = 'ind-badge badge-buy';
-  } else if (ind.mom < -0.35) {
-    momBadge.textContent = 'FRACO';
-    momBadge.className = 'ind-badge badge-sell';
-  } else {
-    momBadge.textContent = 'MÉDIO';
-    momBadge.className = 'ind-badge badge-neu';
-  }
-}
-
-// ─────────────────────────────────────────────
-//  ATUALIZAÇÃO DA UI - SINAL E SCORE
-// ─────────────────────────────────────────────
-function updateSignalUI(signal, score) {
-  const box = $('signalBox');
-  const icon = $('signalIcon');
-  const text = $('signalText');
-  const sub = $('signalSub');
-  
-  // Reset classes
-  box.className = 'signal-box';
-  
-  if (signal === 'BUY') {
-    box.classList.add('buy');
-    icon.textContent = '🟢';
-    text.textContent = 'COMPRA';
-    sub.textContent = `Score: ${score}/100 • Confluência confirmada`;
-  } else if (signal === 'SELL') {
-    box.classList.add('sell');
-    icon.textContent = '🔴';
-    text.textContent = 'VENDA';
-    sub.textContent = `Score: ${score}/100 • Aguardar confirmação`;
-  } else {
-    box.classList.add('neutral');
-    icon.textContent = '🟡';
-    text.textContent = 'AGUARDAR';
-    sub.textContent = `Score: ${score}/100 • Sem confluência clara`;
-  }
-}
-
-function updateScoreArc(score, signal) {
-  const arc = $('arcFill');
-  const num = $('scoreNum');
-  const circumference = 173; // Comprimento do arco SVG
-  
-  // Handle null/invalid scores
-  if (score === null || score === undefined || isNaN(score)) {
-    arc.style.strokeDasharray = `0 ${circumference}`;
-    arc.style.stroke = 'var(--muted)';
-    num.textContent = '--';
-    num.style.color = 'var(--muted)';
-    return;
-  }
-  
-  // Animate arc fill
-  const offset = circumference - (score / 100) * circumference;
-  arc.style.strokeDasharray = `${circumference - offset} ${offset}`;
-  
-  // Dynamic color based on signal
-  const color = signal === 'BUY' ? 'var(--green)' : 
-                signal === 'SELL' ? 'var(--red)' : 'var(--yellow)';
-  arc.style.stroke = color;
-  
-  // Update number
-  num.textContent = score;
-  num.style.color = color;
-}
-
-// ─────────────────────────────────────────────
-//  ESTADOS DE LOADING E RESET
-// ─────────────────────────────────────────────
-function showLoadingState() {
-  const indicators = ['indRsi', 'indVwap', 'indTrend', 'indVol', 'indMom'];
-  const badges = ['badgeRsi', 'badgeVwap', 'badgeTrend', 'badgeVol', 'badgeMom'];
-  
-  indicators.forEach(id => {
-    const el = $(id);
-    if (el) {
-      el.textContent = '...';
-      el.classList.add('loading-text');
-    }
-  });
-  
-  badges.forEach(id => {
-    const el = $(id);
-    if (el) {
-      el.textContent = '---';
-      el.className = 'ind-badge badge-neu';
-    }
-  });
-  
-  $('signalIcon').textContent = '🔄';
-  $('signalText').textContent = 'ANALISANDO';
-  $('signalSub').textContent = 'Processando indicadores...';
-}
-
-function resetToInitial() {
-  const indicators = ['indRsi', 'indVwap', 'indTrend', 'indVol', 'indMom'];
-  const badges = ['badgeRsi', 'badgeVwap', 'badgeTrend', 'badgeVol', 'badgeMom'];
-  
-  indicators.forEach(id => {
-    const el = $(id);
-    if (el) {
-      el.textContent = '--';
-      el.classList.remove('loading-text');
-      el.style.color = 'var(--muted)';
-    }
-  });
-  
-  badges.forEach(id => {
-    const el = $(id);
-    if (el) {
-      el.textContent = '--';
-      el.className = 'ind-badge badge-neu';
-    }
-  });
-  
-  $('signalIcon').textContent = '⏳';
-  $('signalText').textContent = 'AGUARDANDO';
-  $('signalSub').textContent = 'Clique em "Escanear Mercado"';
-  
-  updateScoreArc(null, null);
-}
-
-// ─────────────────────────────────────────────
-//  LOG DE SINAIS
+//  LOG & UTILS
 // ─────────────────────────────────────────────
 function addLogEntry(signal, entryPrice, score, prefix = null) {
   const logList = $('logList');
@@ -1447,114 +1554,59 @@ function addLogEntry(signal, entryPrice, score, prefix = null) {
   if (signal === 'INFO' || signal === 'ERROR') {
     msg = entryPrice || '';
   } else {
-    msg = `Sinal ${signal} • Score: ${score} • Entrada: $${entryPrice}`;
+    msg = `Sinal ${signal} • Score: ${score} • $${entryPrice}`;
   }
   
-  if (prefix) {
-    msg = `${prefix} • ${msg}`;
-  }
+  if (prefix) msg = `${prefix} ${msg}`;
   
-  const signalClass = signal === 'BUY' ? 'buy' : signal === 'SELL' ? 'sell' : 'neu';
+  const signalClass = signal === 'BUY' ? 'buy' : signal === 'SELL' ? 'sell' : signal === 'ERROR' ? 'error' : signal === 'INFO' ? 'info' : 'neu';
   
   entry.innerHTML = `<span class="log-time">${time}</span><span class="log-msg ${signalClass}">${msg}</span>`;
   
-  // Insert at top and limit to 10 entries
   logList.insertBefore(entry, logList.firstChild);
-  if (logList.children.length > 10) {
-    logList.removeChild(logList.lastChild);
-  }
+  if (logList.children.length > 12) logList.removeChild(logList.lastChild);
 }
 
-// ─────────────────────────────────────────────
-//  FEEDBACK HÁPTICO (MOBILE)
-// ─────────────────────────────────────────────
 function triggerHaptic(pattern = [10, 50, 10]) {
   if ('vibrate' in navigator) {
-    try {
-      navigator.vibrate(pattern);
-    } catch(e) {
-      // Ignore se não suportado
-    }
+    try { navigator.vibrate(pattern); } catch(e) {}
   }
 }
 
-// ─────────────────────────────────────────────
-//  MOBILE UX ENHANCEMENTS
-// ─────────────────────────────────────────────
 function setupMobileUX() {
-  // Prevenir zoom em inputs no iOS
   document.querySelectorAll('input[type=number]').forEach(input => {
     input.addEventListener('focus', () => {
-      const viewport = document.querySelector('meta[name=viewport]');
-      if (viewport) {
-        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-      }
+      const vp = document.querySelector('meta[name=viewport]');
+      if (vp) vp.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
     });
     input.addEventListener('blur', () => {
-      const viewport = document.querySelector('meta[name=viewport]');
-      if (viewport) {
-        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
-      }
+      const vp = document.querySelector('meta[name=viewport]');
+      if (vp) vp.setAttribute('content', 'width=device-width, initial-scale=1.0');
     });
   });
-  
-  // Swipe gestures para trocar presets (opcional)
-  let touchStartX = 0;
-  const inputCard = document.querySelector('.grid-2:first-child .card:first-child');
-  
-  if (inputCard) {
-    inputCard.addEventListener('touchstart', e => {
-      touchStartX = e.touches[0].clientX;
-    }, {passive: true});
-    
-    inputCard.addEventListener('touchend', e => {
-      const touchEndX = e.changedTouches[0].clientX;
-      const diff = touchStartX - touchEndX;
-      
-      if (Math.abs(diff) > 60) { // Swipe threshold
-        if (diff > 0 && $('stopPct').value != '0.8') {
-          // Swipe left → Conservador
-          setMode(0.8, 1.2);
-          triggerHaptic([10]);
-        } else if (diff < 0 && $('stopPct').value != '2') {
-          // Swipe right → Agressivo
-          setMode(2, 3);
-          triggerHaptic([10]);
-        }
-      }
-    }, {passive: true});
-  }
 }
 
 // ─────────────────────────────────────────────
-//  INICIALIZAÇÃO
+//  INITIALIZATION
 // ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // Recalcular valores iniciais
   recalc();
-  
-  // Setup price mode toggle (Manual/Auto)
   setupPriceModeToggle();
-  
-  // Setup mobile UX
   setupMobileUX();
   
-  // Log inicial
-  console.log('🚀 ScalpCalc Robot Mode v3.0 carregado');
-  console.log('💡 Dica: Use o toggle para alternar entre preço manual e automático');
+  console.log('🚀 ScalpCalc MT v4.0 carregado');
+  console.log('⚡ Timeframes: 1min + 15min para scalp trading');
+  
+  // Optional: Auto-scan on load if in auto mode
+  // setTimeout(() => { if ($('priceModeToggle').checked) refreshAllData(); }, 1500);
 });
 
-// Keyboard shortcuts (opcional)
+// Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
-  // Ctrl/Cmd + Enter para escanear
-  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !$('scanBtn').disabled) {
     e.preventDefault();
-    if (!$('scanBtn').disabled) {
-      runScan();
-    }
+    runScan();
   }
-  
-  // Teclas 1, 2, 3 para presets
   if (e.target.tagName !== 'INPUT') {
     if (e.key === '1') setMode(0.8, 1.2);
     if (e.key === '2') setMode(1.2, 1.8);
@@ -1562,7 +1614,7 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Cleanup on page unload
+// Cleanup
 window.addEventListener('beforeunload', () => {
   stopAutoUpdate();
 });
