@@ -6,6 +6,8 @@
 <meta name="theme-color" content="#060a0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
+<meta name="description" content="ScalpCalc – Ferramenta educativa para análise de scalp trading">
 <title>ScalpCalc – Robot Mode</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -33,6 +35,7 @@
     font-family: 'Rajdhani', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
+    line-height: 1.5;
   }
 
   body::before {
@@ -104,6 +107,7 @@
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: 16px;
+    transition: opacity .2s ease;
   }
   .card-title {
     font-family: 'JetBrains Mono', monospace;
@@ -162,13 +166,18 @@
     border-radius: 4px;
     border: 1px solid transparent;
     transition: all .18s;
+    user-select: none;
+  }
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
   .btn-default {
     background: transparent;
     border-color: var(--accent);
     color: var(--accent);
   }
-  .btn-default:hover {
+  .btn-default:hover:not(:disabled) {
     background: rgba(0,229,255,.1);
     box-shadow: var(--glow);
   }
@@ -178,7 +187,7 @@
     color: var(--green);
     flex: 1;
   }
-  .btn-cons:hover {
+  .btn-cons:hover:not(:disabled) {
     background: rgba(0,255,136,.1);
     box-shadow: var(--glow-g);
   }
@@ -188,7 +197,7 @@
     color: var(--red);
     flex: 1;
   }
-  .btn-agg:hover {
+  .btn-agg:hover:not(:disabled) {
     background: rgba(255,59,92,.1);
     box-shadow: var(--glow-r);
   }
@@ -203,6 +212,11 @@
     margin-top: 8px;
     position: relative;
     overflow: hidden;
+    font-weight: 700;
+  }
+  .btn-scan:disabled {
+    opacity: 0.7;
+    cursor: wait;
   }
   .btn-scan::after {
     content: '';
@@ -211,7 +225,7 @@
     transform: translateX(-100%);
     transition: transform .5s;
   }
-  .btn-scan:hover::after { transform: translateX(100%); }
+  .btn-scan:hover:not(:disabled)::after { transform: translateX(100%); }
 
   .metric {
     display: flex;
@@ -226,6 +240,7 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 1rem;
     font-weight: 600;
+    min-height: 1.4em;
   }
   .val-green { color: var(--green); text-shadow: var(--glow-g); }
   .val-red   { color: var(--red);   text-shadow: var(--glow-r); }
@@ -238,6 +253,11 @@
     text-align: center;
     border: 2px solid var(--border);
     transition: all .35s;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
   .signal-box.buy {
     border-color: var(--green);
@@ -274,6 +294,7 @@
     font-size: 2rem;
     font-weight: 700;
     line-height: 1;
+    min-height: 2.4rem;
   }
   .score-label { font-size: .72rem; color: var(--text2); letter-spacing: .1em; text-transform: uppercase; }
 
@@ -287,13 +308,21 @@
   }
   .ind-row:last-child { border-bottom: none; }
   .ind-name { flex: 1; color: var(--text2); }
-  .ind-val { font-family: 'JetBrains Mono', monospace; font-size: .88rem; min-width: 60px; text-align: right; }
+  .ind-val { 
+    font-family: 'JetBrains Mono', monospace; 
+    font-size: .88rem; 
+    min-width: 60px; 
+    text-align: right;
+    min-height: 1.2em;
+  }
   .ind-badge {
     font-size: .68rem;
     padding: 2px 7px;
     border-radius: 3px;
     font-weight: 700;
     letter-spacing: .06em;
+    min-width: 65px;
+    text-align: center;
   }
   .badge-buy  { background: rgba(0,255,136,.15); color: var(--green); border: 1px solid rgba(0,255,136,.3); }
   .badge-sell { background: rgba(255,59,92,.15);  color: var(--red);   border: 1px solid rgba(255,59,92,.3); }
@@ -343,10 +372,11 @@
     color: var(--text2);
   }
   .log-entry:last-child { border-bottom: none; }
-  .log-time { color: var(--muted); flex-shrink: 0; }
+  .log-time { color: var(--muted); flex-shrink: 0; min-width: 70px; }
   .log-msg.buy  { color: var(--green); }
   .log-msg.sell { color: var(--red); }
   .log-msg.neu  { color: var(--yellow); }
+  #logList { max-height: 180px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
   .api-notice {
     background: rgba(0,229,255,.04);
@@ -381,37 +411,18 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .hidden { display: none; }
+  .hidden { display: none !important; }
 
-  /* ── Mobile Enhancements ── */
-  @media (max-width: 600px) {
-    button, input, select { min-height: 44px; font-size: 1rem !important; }
-    .card { padding: 12px; border-radius: 8px; }
-    .card-title { font-size: 0.75rem; margin-bottom: 10px; }
-    input[type=number], select { font-size: 1rem; padding: 12px; }
-    .grid-2, .grid-3 { grid-template-columns: 1fr !important; gap: 10px !important; }
-    .signal-box { padding: 24px 16px; }
-    .signal-icon { font-size: 3rem; }
-    .signal-text { font-size: 1.2rem; }
-    .score-arc { width: 140px; height: 80px; }
-    .score-num { font-size: 2.4rem; }
-    .btn-scan { font-size: 1.1rem; padding: 14px; margin-top: 12px; }
-    #logList { max-height: 150px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-    .metric-value, .ind-val { min-height: 1.2em; }
-  }
-
-  @media (prefers-color-scheme: dark) {
-    body { background: var(--bg); color-scheme: dark; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
-    body::after { display: none; }
-  }
-
-  @media (hover: none) and (pointer: coarse) {
-    button:active { transform: scale(0.98); opacity: 0.9; }
-    .btn-scan:active::after { transform: translateX(100%) !important; }
+  .hint-box {
+    margin-top: 12px;
+    padding: 10px;
+    background: rgba(0,229,255,.05);
+    border: 1px dashed rgba(0,229,255,.3);
+    border-radius: 4px;
+    font-size: .75rem;
+    color: var(--text2);
+    text-align: center;
+    line-height: 1.4;
   }
 
   .footer-disclaimer {
@@ -419,9 +430,84 @@
     color: var(--muted);
     text-align: center;
     margin-top: 20px;
-    padding: 10px;
+    padding: 12px;
     border-top: 1px solid var(--border);
     line-height: 1.5;
+  }
+  .footer-disclaimer strong { color: var(--text2); }
+
+  /* ── Mobile Enhancements ── */
+  @media (max-width: 600px) {
+    .container { padding: 12px; }
+    header { padding: 12px 16px; }
+    .logo { font-size: 0.95rem; }
+    
+    button, input, select { 
+      min-height: 44px; 
+      font-size: 1rem !important; 
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .card { padding: 14px; border-radius: 8px; }
+    .card-title { font-size: 0.72rem; margin-bottom: 12px; }
+    
+    input[type=number], select { font-size: 1rem; padding: 12px; }
+    
+    .grid-2, .grid-3 { grid-template-columns: 1fr !important; gap: 12px !important; }
+    
+    .signal-box { padding: 20px 16px; min-height: 130px; }
+    .signal-icon { font-size: 2.8rem; }
+    .signal-text { font-size: 1.1rem; }
+    .signal-sub { font-size: 0.8rem; }
+    
+    .score-arc { width: 140px; height: 80px; }
+    .score-num { font-size: 2.3rem; }
+    
+    .btn-scan { font-size: 1rem; padding: 14px; font-weight: 700; }
+    .btn-row { gap: 6px; }
+    .btn-row button { font-size: 0.8rem; padding: 10px 8px; }
+    
+    .ind-row { padding: 10px 0; font-size: 0.9rem; }
+    .ind-val { min-width: 70px; font-weight: 600; }
+    .ind-badge { min-width: 70px; text-align: center; font-size: 0.7rem; }
+    
+    .metric { padding: 10px 0; }
+    .metric-label { font-size: 0.85rem; }
+    .metric-value { font-size: 1.05rem; }
+    
+    #logList { max-height: 150px; }
+    
+    .ticker-bar { padding: 8px 12px; font-size: 0.7rem; }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body { background: var(--bg); color-scheme: dark; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+    body::after { display: none; }
+  }
+
+  @media (hover: none) and (pointer: coarse) {
+    button:active { transform: scale(0.98); opacity: 0.95; }
+    .btn-scan:active::after { transform: translateX(100%) !important; }
+    input:focus { border-color: var(--accent); }
+  }
+
+  /* Loading animation for values */
+  @keyframes pulse-opacity {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  .loading-text {
+    animation: pulse-opacity 1.5s ease-in-out infinite;
+    color: var(--accent) !important;
   }
 </style>
 </head>
@@ -433,20 +519,20 @@
   <header>
     <div class="logo">SCALP<span>CALC</span> // <span style="color:var(--accent)">ROBOT MODE</span></div>
     <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--text2);">
-      <div class="status-dot"></div> DEMO ATIVO
+      <div class="status-dot"></div> <span id="statusText">DEMO ATIVO</span>
     </div>
   </header>
 
   <!-- Ticker -->
   <div class="ticker-bar">
     <div class="ticker-dot"></div>
-    <div class="ticker-msg" id="tickerMsg">
-      ⚡ Modo Robot ativo — RSI + VWAP + Tendência &nbsp;&nbsp;&nbsp; 
-      📌 Stop padrão: 1.2% &nbsp;&nbsp;&nbsp; 
-      🎯 Take padrão: 1.8% &nbsp;&nbsp;&nbsp; 
-      ⚡ Modo Robot ativo — RSI + VWAP + Tendência &nbsp;&nbsp;&nbsp; 
-      📌 Stop padrão: 1.2% &nbsp;&nbsp;&nbsp; 
-      🎯 Take padrão: 1.8%
+    <div class="ticker-msg">
+      ⚡ Robot Mode: RSI + VWAP + Tendência &nbsp;&nbsp;&nbsp; 
+      📌 Stop: 1.2% &nbsp;&nbsp;&nbsp; 
+      🎯 Take: 1.8% &nbsp;&nbsp;&nbsp; 
+      ⚡ Robot Mode: RSI + VWAP + Tendência &nbsp;&nbsp;&nbsp; 
+      📌 Stop: 1.2% &nbsp;&nbsp;&nbsp; 
+      🎯 Take: 1.8%
     </div>
   </div>
 
@@ -458,28 +544,28 @@
       <div class="card-title">⚙ Parâmetros</div>
 
       <div class="field">
-        <label>Preço de Entrada ($)</label>
-        <input type="number" id="entryPrice" value="67000" step="0.01" min="0">
+        <label for="entryPrice">Preço de Entrada ($)</label>
+        <input type="number" id="entryPrice" value="67000" step="0.01" min="0" inputmode="decimal">
       </div>
 
       <div class="grid grid-2" style="gap:8px;">
         <div class="field">
-          <label>Stop Loss (%)</label>
-          <input type="number" id="stopPct" value="1.2" step="0.1" min="0.1">
+          <label for="stopPct">Stop Loss (%)</label>
+          <input type="number" id="stopPct" value="1.2" step="0.1" min="0.1" inputmode="decimal">
         </div>
         <div class="field">
-          <label>Take Profit (%)</label>
-          <input type="number" id="takePct" value="1.8" step="0.1" min="0.1">
+          <label for="takePct">Take Profit (%)</label>
+          <input type="number" id="takePct" value="1.8" step="0.1" min="0.1" inputmode="decimal">
         </div>
       </div>
 
       <div class="btn-row">
-        <button class="btn-cons" onclick="setMode(.8,1.2)">🛡 Conservador</button>
-        <button class="btn-default" onclick="setMode(1.2,1.8)" style="flex:1;">📌 Padrão</button>
-        <button class="btn-agg" onclick="setMode(2,3)">⚡ Agressivo</button>
+        <button class="btn-cons" onclick="setMode(.8,1.2)" type="button">🛡 Conservador</button>
+        <button class="btn-default" onclick="setMode(1.2,1.8)" style="flex:1;" type="button">📌 Padrão</button>
+        <button class="btn-agg" onclick="setMode(2,3)" type="button">⚡ Agressivo</button>
       </div>
 
-      <button class="btn-scan" onclick="runScan()">
+      <button class="btn-scan" id="scanBtn" onclick="runScan()" type="button">
         <span id="btnLabel">🤖 ESCANEAR MERCADO</span>
         <span id="btnSpinner" class="spinner hidden"></span>
       </button>
@@ -489,22 +575,23 @@
     <div class="card" style="display:flex;flex-direction:column;gap:12px;">
       <div class="card-title">📡 Sinal Atual</div>
 
-      <div class="signal-box neutral" id="signalBox">
-        <div class="signal-icon" id="signalIcon">⏳</div>
+      <div class="signal-box neutral" id="signalBox" role="status" aria-live="polite">
+        <div class="signal-icon" id="signalIcon" aria-hidden="true">⏳</div>
         <div class="signal-text" id="signalText">AGUARDANDO</div>
-        <div class="signal-sub" id="signalSub">Clique em Escanear Mercado</div>
+        <div class="signal-sub" id="signalSub">Clique em "Escanear Mercado"</div>
       </div>
 
       <!-- Score -->
       <div class="score-wrap">
-        <div class="score-arc">
-          <svg width="120" height="70" viewBox="0 0 120 70">
+        <div class="score-arc" aria-label="Score de confluência">
+          <svg width="120" height="70" viewBox="0 0 120 70" role="img">
+            <title>Indicador de Score</title>
             <path d="M10,65 A55,55 0 0,1 110,65" fill="none" stroke="#1a2433" stroke-width="8" stroke-linecap="round"/>
             <path id="arcFill" d="M10,65 A55,55 0 0,1 110,65" fill="none" stroke="#00e5ff" stroke-width="8" stroke-linecap="round"
               stroke-dasharray="0 173" style="transition:stroke-dasharray .6s ease, stroke .4s;"/>
           </svg>
         </div>
-        <div class="score-num" id="scoreNum" style="color:var(--accent);">--</div>
+        <div class="score-num" id="scoreNum" style="color:var(--muted);">--</div>
         <div class="score-label">Score de Confluência</div>
       </div>
     </div>
@@ -536,7 +623,7 @@
 
       <div class="rr-bar-wrap">
         <div style="font-size:.72rem;color:var(--text2);">Visualização R/R</div>
-        <div class="rr-bar-track">
+        <div class="rr-bar-track" role="progressbar" aria-label="Proporção Risco/Retorno">
           <div class="rr-bar-stop" id="rrStop" style="width:40%;"></div>
           <div class="rr-bar-take" id="rrTake" style="width:60%;"></div>
         </div>
@@ -550,44 +637,46 @@
 
       <div class="ind-row">
         <span class="ind-name">RSI (14)</span>
-        <span class="ind-val" id="indRsi" style="color:var(--text)">--</span>
+        <span class="ind-val" id="indRsi" style="color:var(--muted)">--</span>
         <span class="ind-badge badge-neu" id="badgeRsi">--</span>
       </div>
       <div class="ind-row">
         <span class="ind-name">VWAP</span>
-        <span class="ind-val" id="indVwap" style="color:var(--text)">--</span>
+        <span class="ind-val" id="indVwap" style="color:var(--muted)">--</span>
         <span class="ind-badge badge-neu" id="badgeVwap">--</span>
       </div>
       <div class="ind-row">
         <span class="ind-name">Tendência</span>
-        <span class="ind-val" id="indTrend" style="color:var(--text)">--</span>
+        <span class="ind-val" id="indTrend" style="color:var(--muted)">--</span>
         <span class="ind-badge badge-neu" id="badgeTrend">--</span>
       </div>
       <div class="ind-row">
         <span class="ind-name">Volatilidade</span>
-        <span class="ind-val" id="indVol" style="color:var(--text)">--</span>
+        <span class="ind-val" id="indVol" style="color:var(--muted)">--</span>
         <span class="ind-badge badge-neu" id="badgeVol">--</span>
       </div>
       <div class="ind-row">
         <span class="ind-name">Momentum</span>
-        <span class="ind-val" id="indMom" style="color:var(--text)">--</span>
+        <span class="ind-val" id="indMom" style="color:var(--muted)">--</span>
         <span class="ind-badge badge-neu" id="badgeMom">--</span>
+      </div>
+      
+      <div class="hint-box">
+        💡 Clique em <strong>"🤖 ESCANEAR MERCADO"</strong> para analisar os indicadores em tempo real
       </div>
     </div>
   </div>
 
   <!-- Binance API info -->
   <div class="card" style="margin-bottom:12px;">
-    <div class="card-title">🔌 Integração API Binance (Próximo Passo)</div>
+    <div class="card-title">🔌 Integração API (Próximo Passo)</div>
     <div class="api-notice">
-      <strong>⚠️ Segurança:</strong> Nunca coloque sua API Key diretamente no HTML. Use um backend intermediário.<br><br>
-      <strong>Arquitetura correta:</strong> <code>Seu site → Backend Node.js → API Binance</code><br><br>
-      Quando seu backend estiver no ar, substitua a simulação abaixo pela chamada real:
+      <strong>⚠️ Segurança:</strong> Nunca coloque API Keys no frontend. Use backend intermediário.<br><br>
+      <strong>Arquitetura:</strong> <code>Frontend → Backend Node.js → Binance API</code><br><br>
+      Para usar dados reais, substitua <code>fetchIndicators()</code> por:
       <div class="api-endpoint">
-        // Substitua a função simulateIndicators() por:<br>
-        const res = await fetch("https://SEU-BACKEND.com/signal?symbol=BTCUSDT");<br>
-        const data = await res.json();<br>
-        // data = { price, rsi, vwap, signal, suggestedStop, suggestedTake }
+        const res = await fetch("https://SEU-BACKEND/api/signal?symbol=BTCUSDT");<br>
+        return await res.json();
       </div>
     </div>
   </div>
@@ -595,15 +684,16 @@
   <!-- Log -->
   <div class="card">
     <div class="card-title">📋 Log de Sinais</div>
-    <div id="logList">
-      <div class="log-entry"><span class="log-time">--:--:--</span><span class="log-msg neu">Sistema iniciado. Aguardando primeiro scan...</span></div>
+    <div id="logList" role="log" aria-live="polite">
+      <div class="log-entry"><span class="log-time">--:--:--</span><span class="log-msg neu">Sistema iniciado. Aguardando análise...</span></div>
     </div>
   </div>
 
   <!-- Footer Disclaimer -->
   <div class="footer-disclaimer">
-    🔐 <strong>Disclaimer:</strong> ScalpCalc é ferramenta educativa. Criptomoedas são ativos de alto risco.<br>
-    Nunca opere com capital que não pode perder. Este software não constitui recomendação financeira.
+    🔐 <strong>Disclaimer Educativo:</strong> ScalpCalc é uma ferramenta de estudo e simulação.<br>
+    Criptomoedas são ativos de alta volatilidade e risco. Nunca opere com capital que não pode perder.<br>
+    Este software <strong>não constitui</strong> recomendação financeira, consultoria ou aconselhamento de investimento.
   </div>
 
 </div>
@@ -624,7 +714,7 @@ function recalc() {
 
   const stopPrice = entry * (1 - stopPct / 100);
   const takePrice = entry * (1 + takePct / 100);
-  const rr = (takePct / stopPct).toFixed(2);
+  const rr = stopPct > 0 ? (takePct / stopPct).toFixed(2) : '∞';
 
   $('dispEntry').textContent = '$' + entry.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
   $('dispStop').textContent  = '$' + stopPrice.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -632,8 +722,10 @@ function recalc() {
   $('dispRR').textContent    = '1 : ' + rr;
 
   const total = stopPct + takePct;
-  $('rrStop').style.width = (stopPct / total * 100) + '%';
-  $('rrTake').style.width = (takePct / total * 100) + '%';
+  if (total > 0) {
+    $('rrStop').style.width = (stopPct / total * 100) + '%';
+    $('rrTake').style.width = (takePct / total * 100) + '%';
+  }
 }
 
 function setMode(stop, take) {
@@ -642,64 +734,116 @@ function setMode(stop, take) {
   recalc();
 }
 
-['entryPrice','stopPct','takePct'].forEach(id => $(id).addEventListener('input', recalc));
-recalc();
+// Event listeners para recalcular ao digitar
+['entryPrice','stopPct','takePct'].forEach(id => {
+  const el = $(id);
+  if (el) {
+    el.addEventListener('input', recalc);
+    el.addEventListener('change', recalc);
+  }
+});
 
 // ─────────────────────────────────────────────
 //  FUNÇÃO PRINCIPAL: runScan()
 // ─────────────────────────────────────────────
 async function runScan() {
+  const btn = $('scanBtn');
   const btnLabel = $('btnLabel');
   const btnSpinner = $('btnSpinner');
   
-  // UI: Mostrar loading
+  // Desabilitar botão durante análise
+  btn.disabled = true;
   btnLabel.classList.add('hidden');
   btnSpinner.classList.remove('hidden');
-  $('signalBox').className = 'signal-box neutral';
-  $('signalIcon').textContent = '🔄';
-  $('signalText').textContent = 'ANALISANDO';
-  $('signalSub').textContent = 'Coletando dados de mercado...';
+  
+  // Mostrar loading nos indicadores
+  showLoadingState();
+  
+  // Feedback visual nos cards
+  document.querySelectorAll('.card').forEach(card => {
+    card.style.opacity = '0.85';
+    card.style.transition = 'opacity .2s ease';
+  });
 
   try {
     const entryPrice = parseFloat($('entryPrice').value) || 67000;
+    
+    // Simular delay de rede (remover ao usar API real)
+    await new Promise(resolve => setTimeout(resolve, 700));
+    
+    // Buscar indicadores (simulado ou API)
     const indicators = await fetchIndicators(entryPrice);
+    
+    // Calcular score e sinal
     const score = calculateConfluenceScore(indicators, entryPrice);
     const signal = determineSignal(indicators, score);
     
+    // Atualizar UI
     updateIndicatorsUI(indicators);
     updateSignalUI(signal, score);
     updateScoreArc(score, signal);
     addLogEntry(signal, entryPrice, score);
+    
+    // Recalcular alvos
     recalc();
     
+    // Feedback háptico se suportado
+    if (signal === 'BUY' || signal === 'SELL') {
+      triggerHaptic(signal === 'BUY' ? [15, 30, 15] : [40, 20, 40]);
+    }
+    
   } catch (error) {
-    console.error('Erro no scan:', error);
+    console.error('❌ Erro no scan:', error);
     $('signalIcon').textContent = '⚠️';
     $('signalText').textContent = 'ERRO';
-    $('signalSub').textContent = 'Falha ao analisar mercado';
-    addLogEntry('ERROR', 0, 0, 'Erro na análise');
+    $('signalSub').textContent = 'Falha na análise. Tente novamente.';
+    addLogEntry('ERROR', 0, 0, 'Erro ao processar dados');
+    
   } finally {
+    // Restaurar UI após pequeno delay
     setTimeout(() => {
+      btn.disabled = false;
       btnLabel.classList.remove('hidden');
       btnSpinner.classList.add('hidden');
-    }, 500);
+      
+      document.querySelectorAll('.card').forEach(card => {
+        card.style.opacity = '1';
+      });
+    }, 250);
   }
 }
 
 // ─────────────────────────────────────────────
-//  BUSCA DE INDICADORES (SIMULAÇÃO)
+//  BUSCA DE INDICADORES (SIMULAÇÃO REALISTA)
 // ─────────────────────────────────────────────
 async function fetchIndicators(entryPrice) {
+  // 🔄 MODO SIMULAÇÃO (padrão atual)
+  // Para produção: substitua por fetch real da API
+  
   return new Promise((resolve) => {
     setTimeout(() => {
+      // Simular comportamento de mercado mais realista
       const marketBias = Math.random() > 0.5 ? 1 : -1;
-      const rsi = Math.max(20, Math.min(80, 50 + (marketBias * 15) + (Math.random() * 20 - 10)));
-      const vwap = entryPrice * (1 + ((Math.random() - 0.5) * 0.02 * marketBias));
+      const noise = () => (Math.random() - 0.5) * 10;
+      
+      // RSI com viés de mercado
+      const rsiBase = 50 + (marketBias * 18) + noise();
+      const rsi = Math.max(20, Math.min(80, rsiBase));
+      
+      // VWAP próximo ao preço de entrada
+      const vwapDeviation = ((Math.random() - 0.5) * 0.025 * marketBias);
+      const vwap = entryPrice * (1 + vwapDeviation);
+      
+      // Tendência com pesos
       const trendRoll = Math.random();
-      const trend = trendRoll < 0.4 ? 'BAIXA' : trendRoll < 0.8 ? 'ALTA' : 'LATERAL';
+      const trend = trendRoll < 0.35 ? 'BAIXA' : trendRoll < 0.75 ? 'ALTA' : 'LATERAL';
+      
+      // Volatilidade
       const volRoll = Math.random();
-      const vol = volRoll < 0.3 ? 'BAIXA' : volRoll < 0.7 ? 'MÉDIA' : 'ALTA';
-      const mom = (rsi - 50) / 50 + (Math.random() * 0.4 - 0.2);
+      const vol = volRoll < 0.25 ? 'BAIXA' : volRoll < 0.7 ? 'MÉDIA' : 'ALTA';
+      
+      // Momentum correlacionado com RSI
+      const mom = ((rsi - 50) / 45) + (Math.random() * 0.5 - 0.25);
       
       resolve({
         rsi: parseFloat(rsi.toFixed(1)),
@@ -709,32 +853,55 @@ async function fetchIndicators(entryPrice) {
         mom: parseFloat(mom.toFixed(2)),
         price: entryPrice
       });
-    }, 800);
+    }, 600);
   });
+
+  // 🌐 MODO REAL (descomente quando tiver backend)
+  /*
+  async function fetchIndicators(entryPrice) {
+    const res = await fetch(`https://SEU-BACKEND.com/api/signal?symbol=BTCUSDT&entry=${entryPrice}`);
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    const data = await res.json();
+    return {
+      rsi: data.data.indicators.rsi,
+      vwap: data.data.indicators.vwap,
+      trend: data.data.indicators.trend,
+      vol: data.data.indicators.volatility,
+      mom: data.data.indicators.momentum,
+      price: data.data.price
+    };
+  }
+  */
 }
 
 // ─────────────────────────────────────────────
 //  CÁLCULO DE SCORE DE CONFLUÊNCIA (0-100)
 // ─────────────────────────────────────────────
 function calculateConfluenceScore(ind, entryPrice) {
-  let score = 50;
+  let score = 50; // Base neutra
   
-  if (ind.rsi < 30) score += 25;
-  else if (ind.rsi < 45) score += 12;
-  else if (ind.rsi > 70) score -= 25;
-  else if (ind.rsi > 55) score -= 12;
+  // 📊 RSI: ±25 pontos
+  if (ind.rsi < 30) score += 25;           // Oversold → Bullish
+  else if (ind.rsi < 45) score += 12;      // Levemente oversold
+  else if (ind.rsi > 70) score -= 25;      // Overbought → Bearish
+  else if (ind.rsi > 55) score -= 12;      // Levemente overbought
   
+  // 📈 VWAP: ±15 pontos
   if (entryPrice < ind.vwap * 0.995) score += 15;
   else if (entryPrice > ind.vwap * 1.005) score -= 15;
   
+  // 🧭 Tendência: ±20 pontos
   if (ind.trend === 'ALTA') score += 20;
   else if (ind.trend === 'BAIXA') score -= 20;
   
-  if (ind.vol === 'ALTA') score = Math.floor(score * 0.9);
-  else if (ind.vol === 'BAIXA') score = Math.floor(score * 1.05);
+  // 🌊 Volatilidade: ajuste de risco
+  if (ind.vol === 'ALTA') score = Math.floor(score * 0.92);
+  else if (ind.vol === 'BAIXA') score = Math.floor(score * 1.04);
   
+  // ⚡ Momentum: ±10 pontos
   score += Math.round(ind.mom * 10);
   
+  // Clamp entre 0 e 100
   return Math.max(0, Math.min(100, Math.round(score)));
 }
 
@@ -742,8 +909,19 @@ function calculateConfluenceScore(ind, entryPrice) {
 //  DETERMINAÇÃO DO SINAL
 // ─────────────────────────────────────────────
 function determineSignal(ind, score) {
-  if (score >= 70 && ind.rsi < 50 && ind.trend !== 'BAIXA') return 'BUY';
-  if (score <= 30 && ind.rsi > 50 && ind.trend !== 'ALTA') return 'SELL';
+  // Regras de confirmação múltipla para reduzir falsos sinais
+  
+  if (score >= 72) {
+    // BUY: precisa de RSI favorável e tendência não-baixista
+    if (ind.rsi < 52 && ind.trend !== 'BAIXA') return 'BUY';
+  }
+  
+  if (score <= 28) {
+    // SELL: precisa de RSI favorável e tendência não-altista
+    if (ind.rsi > 48 && ind.trend !== 'ALTA') return 'SELL';
+  }
+  
+  // Zona neutra ou sem confirmação suficiente
   return 'NEUTRAL';
 }
 
@@ -752,30 +930,34 @@ function determineSignal(ind, score) {
 // ─────────────────────────────────────────────
 function updateIndicatorsUI(ind) {
   // RSI
-  $('indRsi').textContent = ind.rsi;
+  const rsiEl = $('indRsi');
   const rsiBadge = $('badgeRsi');
+  rsiEl.textContent = ind.rsi;
+  
   if (ind.rsi < 30) {
     rsiBadge.textContent = 'COMPRA';
     rsiBadge.className = 'ind-badge badge-buy';
-    $('indRsi').style.color = 'var(--green)';
+    rsiEl.style.color = 'var(--green)';
   } else if (ind.rsi > 70) {
     rsiBadge.textContent = 'VENDA';
     rsiBadge.className = 'ind-badge badge-sell';
-    $('indRsi').style.color = 'var(--red)';
+    rsiEl.style.color = 'var(--red)';
   } else {
     rsiBadge.textContent = 'NEUTRO';
     rsiBadge.className = 'ind-badge badge-neu';
-    $('indRsi').style.color = 'var(--text)';
+    rsiEl.style.color = 'var(--text)';
   }
   
   // VWAP
-  $('indVwap').textContent = '$' + ind.vwap.toLocaleString('en-US', {minimumFractionDigits: 2});
+  const vwapEl = $('indVwap');
   const vwapBadge = $('badgeVwap');
-  const entry = parseFloat($('entryPrice').value);
-  if (entry < ind.vwap) {
+  const entry = parseFloat($('entryPrice').value) || ind.price;
+  vwapEl.textContent = '$' + ind.vwap.toLocaleString('en-US', {minimumFractionDigits: 2});
+  
+  if (entry < ind.vwap * 0.998) {
     vwapBadge.textContent = 'ABAIXO';
     vwapBadge.className = 'ind-badge badge-buy';
-  } else if (entry > ind.vwap) {
+  } else if (entry > ind.vwap * 1.002) {
     vwapBadge.textContent = 'ACIMA';
     vwapBadge.className = 'ind-badge badge-sell';
   } else {
@@ -784,8 +966,10 @@ function updateIndicatorsUI(ind) {
   }
   
   // Tendência
-  $('indTrend').textContent = ind.trend;
+  const trendEl = $('indTrend');
   const trendBadge = $('badgeTrend');
+  trendEl.textContent = ind.trend;
+  
   if (ind.trend === 'ALTA') {
     trendBadge.textContent = '🟢';
     trendBadge.className = 'ind-badge badge-buy';
@@ -798,18 +982,21 @@ function updateIndicatorsUI(ind) {
   }
   
   // Volatilidade
-  $('indVol').textContent = ind.vol;
+  const volEl = $('indVol');
   const volBadge = $('badgeVol');
+  volEl.textContent = ind.vol;
   volBadge.textContent = ind.vol === 'ALTA' ? '⚠️' : ind.vol === 'BAIXA' ? '✓' : '•';
   volBadge.className = 'ind-badge badge-neu';
   
   // Momentum
-  $('indMom').textContent = ind.mom > 0 ? '+' + ind.mom : ind.mom;
+  const momEl = $('indMom');
   const momBadge = $('badgeMom');
-  if (ind.mom > 0.3) {
+  momEl.textContent = ind.mom > 0 ? '+' + ind.mom : ind.mom;
+  
+  if (ind.mom > 0.35) {
     momBadge.textContent = 'FORTE';
     momBadge.className = 'ind-badge badge-buy';
-  } else if (ind.mom < -0.3) {
+  } else if (ind.mom < -0.35) {
     momBadge.textContent = 'FRACO';
     momBadge.className = 'ind-badge badge-sell';
   } else {
@@ -827,18 +1014,19 @@ function updateSignalUI(signal, score) {
   const text = $('signalText');
   const sub = $('signalSub');
   
+  // Reset classes
   box.className = 'signal-box';
   
   if (signal === 'BUY') {
     box.classList.add('buy');
     icon.textContent = '🟢';
     text.textContent = 'COMPRA';
-    sub.textContent = `Score: ${score}/100 • Entrada confirmada`;
+    sub.textContent = `Score: ${score}/100 • Confluência confirmada`;
   } else if (signal === 'SELL') {
     box.classList.add('sell');
     icon.textContent = '🔴';
     text.textContent = 'VENDA';
-    sub.textContent = `Score: ${score}/100 • Aguardar pullback`;
+    sub.textContent = `Score: ${score}/100 • Aguardar confirmação`;
   } else {
     box.classList.add('neutral');
     icon.textContent = '🟡';
@@ -850,17 +1038,85 @@ function updateSignalUI(signal, score) {
 function updateScoreArc(score, signal) {
   const arc = $('arcFill');
   const num = $('scoreNum');
-  const circumference = 173;
+  const circumference = 173; // Comprimento do arco SVG
   
+  // Handle null/invalid scores
+  if (score === null || score === undefined || isNaN(score)) {
+    arc.style.strokeDasharray = `0 ${circumference}`;
+    arc.style.stroke = 'var(--muted)';
+    num.textContent = '--';
+    num.style.color = 'var(--muted)';
+    return;
+  }
+  
+  // Animate arc fill
   const offset = circumference - (score / 100) * circumference;
   arc.style.strokeDasharray = `${circumference - offset} ${offset}`;
   
+  // Dynamic color based on signal
   const color = signal === 'BUY' ? 'var(--green)' : 
                 signal === 'SELL' ? 'var(--red)' : 'var(--yellow)';
   arc.style.stroke = color;
   
+  // Update number
   num.textContent = score;
   num.style.color = color;
+}
+
+// ─────────────────────────────────────────────
+//  ESTADOS DE LOADING E RESET
+// ─────────────────────────────────────────────
+function showLoadingState() {
+  const indicators = ['indRsi', 'indVwap', 'indTrend', 'indVol', 'indMom'];
+  const badges = ['badgeRsi', 'badgeVwap', 'badgeTrend', 'badgeVol', 'badgeMom'];
+  
+  indicators.forEach(id => {
+    const el = $(id);
+    if (el) {
+      el.textContent = '...';
+      el.classList.add('loading-text');
+    }
+  });
+  
+  badges.forEach(id => {
+    const el = $(id);
+    if (el) {
+      el.textContent = '---';
+      el.className = 'ind-badge badge-neu';
+    }
+  });
+  
+  $('signalIcon').textContent = '🔄';
+  $('signalText').textContent = 'ANALISANDO';
+  $('signalSub').textContent = 'Processando indicadores...';
+}
+
+function resetToInitial() {
+  const indicators = ['indRsi', 'indVwap', 'indTrend', 'indVol', 'indMom'];
+  const badges = ['badgeRsi', 'badgeVwap', 'badgeTrend', 'badgeVol', 'badgeMom'];
+  
+  indicators.forEach(id => {
+    const el = $(id);
+    if (el) {
+      el.textContent = '--';
+      el.classList.remove('loading-text');
+      el.style.color = 'var(--muted)';
+    }
+  });
+  
+  badges.forEach(id => {
+    const el = $(id);
+    if (el) {
+      el.textContent = '--';
+      el.className = 'ind-badge badge-neu';
+    }
+  });
+  
+  $('signalIcon').textContent = '⏳';
+  $('signalText').textContent = 'AGUARDANDO';
+  $('signalSub').textContent = 'Clique em "Escanear Mercado"';
+  
+  updateScoreArc(null, null);
 }
 
 // ─────────────────────────────────────────────
@@ -868,6 +1124,8 @@ function updateScoreArc(score, signal) {
 // ─────────────────────────────────────────────
 function addLogEntry(signal, entryPrice, score, customMsg = null) {
   const logList = $('logList');
+  if (!logList) return;
+  
   const entry = document.createElement('div');
   entry.className = 'log-entry';
   
@@ -877,6 +1135,7 @@ function addLogEntry(signal, entryPrice, score, customMsg = null) {
   
   entry.innerHTML = `<span class="log-time">${time}</span><span class="log-msg ${signalClass}">${msg}</span>`;
   
+  // Insert at top and limit to 10 entries
   logList.insertBefore(entry, logList.firstChild);
   if (logList.children.length > 10) {
     logList.removeChild(logList.lastChild);
@@ -884,29 +1143,104 @@ function addLogEntry(signal, entryPrice, score, customMsg = null) {
 }
 
 // ─────────────────────────────────────────────
+//  FEEDBACK HÁPTICO (MOBILE)
+// ─────────────────────────────────────────────
+function triggerHaptic(pattern = [10, 50, 10]) {
+  if ('vibrate' in navigator) {
+    try {
+      navigator.vibrate(pattern);
+    } catch(e) {
+      // Ignore se não suportado
+    }
+  }
+}
+
+// ─────────────────────────────────────────────
 //  MOBILE UX ENHANCEMENTS
 // ─────────────────────────────────────────────
-document.querySelectorAll('input[type=number]').forEach(input => {
-  input.addEventListener('focus', () => {
-    const viewport = document.querySelector('meta[name=viewport]');
-    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+function setupMobileUX() {
+  // Prevenir zoom em inputs no iOS
+  document.querySelectorAll('input[type=number]').forEach(input => {
+    input.addEventListener('focus', () => {
+      const viewport = document.querySelector('meta[name=viewport]');
+      if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+      }
+    });
+    input.addEventListener('blur', () => {
+      const viewport = document.querySelector('meta[name=viewport]');
+      if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
+      }
+    });
   });
-  input.addEventListener('blur', () => {
-    const viewport = document.querySelector('meta[name=viewport]');
-    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
-  });
-});
-
-function triggerHaptic(pattern = [10, 50, 10]) {
-  if (navigator.vibrate) navigator.vibrate(pattern);
+  
+  // Swipe gestures para trocar presets (opcional)
+  let touchStartX = 0;
+  const inputCard = document.querySelector('.grid-2:first-child .card:first-child');
+  
+  if (inputCard) {
+    inputCard.addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].clientX;
+    }, {passive: true});
+    
+    inputCard.addEventListener('touchend', e => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const diff = touchStartX - touchEndX;
+      
+      if (Math.abs(diff) > 60) { // Swipe threshold
+        if (diff > 0 && $('stopPct').value != '0.8') {
+          // Swipe left → Conservador
+          setMode(0.8, 1.2);
+          triggerHaptic([10]);
+        } else if (diff < 0 && $('stopPct').value != '2') {
+          // Swipe right → Agressivo
+          setMode(2, 3);
+          triggerHaptic([10]);
+        }
+      }
+    }, {passive: true});
+  }
 }
 
 // ─────────────────────────────────────────────
 //  INICIALIZAÇÃO
 // ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  // Recalcular valores iniciais
   recalc();
-  console.log('🚀 ScalpCalc Robot Mode carregado');
+  
+  // Setup mobile UX
+  setupMobileUX();
+  
+  // Log inicial
+  console.log('🚀 ScalpCalc Robot Mode v2.1 carregado');
+  console.log('💡 Dica: Use os presets para ajustar risco rapidamente');
+  
+  // Opcional: Auto-scan após carregamento (comentar se quiser manual)
+  // setTimeout(() => {
+  //   if (!localStorage.getItem('scalpcalc_autoScanDisabled')) {
+  //     runScan();
+  //   }
+  // }, 1500);
+});
+
+// Keyboard shortcuts (opcional)
+document.addEventListener('keydown', (e) => {
+  // Ctrl/Cmd + Enter para escanear
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    if (!$('scanBtn').disabled) {
+      runScan();
+    }
+  }
+  
+  // Teclas 1, 2, 3 para presets
+  if (e.target.tagName !== 'INPUT') {
+    if (e.key === '1') setMode(0.8, 1.2);
+    if (e.key === '2') setMode(1.2, 1.8);
+    if (e.key === '3') setMode(2, 3);
+  }
 });
 </script>
 
