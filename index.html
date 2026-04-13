@@ -62,7 +62,7 @@
 
   .container {
     position: relative; z-index: 1;
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 16px;
   }
@@ -250,6 +250,18 @@
     background: rgba(255,59,92,.2);
     box-shadow: var(--glow-r);
   }
+  .btn-indicator {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 0.75rem;
+    padding: 6px 12px;
+  }
+  .btn-indicator.active {
+    background: rgba(0,229,255,.15);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
 
   .metric {
     display: flex;
@@ -400,22 +412,22 @@
 
   .log-entry {
     font-family: 'JetBrains Mono', monospace;
-    font-size: .7rem;
-    padding: 4px 0;
+    font-size: .68rem;
+    padding: 3px 0;
     border-bottom: 1px solid var(--border);
     display: flex;
     gap: 8px;
     color: var(--text2);
   }
   .log-entry:last-child { border-bottom: none; }
-  .log-time { color: var(--muted); flex-shrink: 0; min-width: 65px; font-size: 0.68rem; }
+  .log-time { color: var(--muted); flex-shrink: 0; min-width: 60px; font-size: 0.65rem; }
   .log-msg.buy  { color: var(--green); }
   .log-msg.sell { color: var(--red); }
   .log-msg.neu  { color: var(--yellow); }
   .log-msg.info { color: var(--accent); }
   .log-msg.error { color: var(--red); }
   .log-msg.warn { color: var(--yellow); }
-  #logList { max-height: 160px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  #logList { max-height: 120px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
   .spinner {
     display: inline-block;
@@ -756,6 +768,58 @@
     padding: 6px 12px;
   }
 
+  /* ── TradingView Chart Container ── */
+  .chart-container {
+    margin-bottom: 16px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--panel);
+  }
+  
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(0,0,0,.2);
+    border-bottom: 1px solid var(--border);
+  }
+  .chart-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chart-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .chart-timeframe-select {
+    background: #080d13;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .chart-indicators {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  
+  #tradingview_chart {
+    width: 100%;
+    height: 400px;
+  }
+
   /* ── Mobile Enhancements ── */
   @media (max-width: 768px) {
     .container { padding: 12px; }
@@ -794,7 +858,7 @@
     .metric-label { font-size: 0.85rem; }
     .metric-value { font-size: 1rem; }
     
-    #logList { max-height: 140px; }
+    #logList { max-height: 100px; }
     
     .ticker-bar { padding: 8px 12px; font-size: 0.7rem; }
     
@@ -810,6 +874,22 @@
     }
     .tf-indicators {
       grid-template-columns: 1fr;
+    }
+    
+    /* Chart mobile */
+    #tradingview_chart {
+      height: 300px;
+    }
+    .chart-controls {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+    }
+    .chart-timeframe-select {
+      width: 100%;
+    }
+    .chart-indicators {
+      justify-content: center;
     }
   }
 
@@ -1039,7 +1119,32 @@
     <span id="confluenceText">Aguardando análise dos timeframes...</span>
   </div>
 
-  <!-- Row 3: Targets -->
+  <!-- Row 3: TradingView Chart -->
+  <div class="chart-container">
+    <div class="chart-header">
+      <div class="chart-title">
+        📈 <span id="chartSymbol">BTC/USDT</span>
+      </div>
+      <div class="chart-controls">
+        <select class="chart-timeframe-select" id="chartTimeframe" onchange="updateChart()">
+          <option value="1">1 minuto</option>
+          <option value="5">5 minutos</option>
+          <option value="15" selected>15 minutos</option>
+          <option value="60">1 hora</option>
+          <option value="240">4 horas</option>
+          <option value="D">1 dia</option>
+        </select>
+        <div class="chart-indicators">
+          <button class="btn-indicator active" id="btnRSI" onclick="toggleIndicator('RSI')" title="RSI">RSI</button>
+          <button class="btn-indicator active" id="btnEMA" onclick="toggleIndicator('EMA')" title="EMA">EMA</button>
+          <button class="btn-indicator" id="btnVOL" onclick="toggleIndicator('VOL')" title="Volume">VOL</button>
+        </div>
+      </div>
+    </div>
+    <div id="tradingview_chart"></div>
+  </div>
+
+  <!-- Row 4: Targets -->
   <div class="card" style="margin-bottom:12px;">
     <div class="card-title">💰 Alvos Calculados</div>
 
@@ -1087,7 +1192,123 @@
 
 </div>
 
+<!-- TradingView Widget Script -->
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+
 <script>
+// ─────────────────────────────────────────────
+//  TRADINGVIEW CHART
+// ─────────────────────────────────────────────
+let tvWidget = null;
+let chartIndicators = {
+  RSI: true,
+  EMA: true,
+  VOL: false
+};
+
+function initTradingViewChart(symbol = 'BTCUSDT', interval = '15') {
+  const container = 'tradingview_chart';
+  
+  // Convert symbol format for TradingView
+  const tvSymbol = `BINANCE:${symbol}`;
+  
+  // Map interval
+  const tvInterval = interval === '1' ? '1' : 
+                     interval === '5' ? '5' :
+                     interval === '15' ? '15' :
+                     interval === '60' ? '60' :
+                     interval === '240' ? '240' : 'D';
+  
+  // Clear previous widget
+  if (tvWidget) {
+    // Widget will be replaced
+  }
+  
+  // Create new widget
+  tvWidget = new TradingView.widget({
+    width: '100%',
+    height: 400,
+    symbol: tvSymbol,
+    interval: tvInterval,
+    timezone: 'America/Sao_Paulo',
+    theme: 'dark',
+    style: '1',
+    locale: 'br',
+    toolbar_bg: '#0c1117',
+    enable_publishing: false,
+    allow_symbol_change: false,
+    container_id: container,
+    studies: getChartStudies(),
+    hide_side_toolbar: false,
+    details: true,
+    hotlist: true,
+    calendar: false,
+    show_popup_button: false,
+    popup_width: '1000',
+    popup_height: '650'
+  });
+  
+  console.log(`[CHART] TradingView initialized: ${tvSymbol} ${tvInterval}`);
+}
+
+function getChartStudies() {
+  const studies = [];
+  
+  if (chartIndicators.RSI) {
+    studies.push('RSI@tv-basicstudies');
+  }
+  
+  if (chartIndicators.EMA) {
+    studies.push('EMA@tv-basicstudies');
+  }
+  
+  if (chartIndicators.VOL) {
+    studies.push('Volume@tv-basicstudies');
+  }
+  
+  return studies;
+}
+
+function updateChart() {
+  const symbol = $('symbolSelect')?.value || 'BTCUSDT';
+  const interval = $('chartTimeframe')?.value || '15';
+  
+  if (tvWidget) {
+    // Remove old widget and create new one
+    const container = $('tradingview_chart');
+    if (container) {
+      container.innerHTML = '';
+    }
+    setTimeout(() => {
+      initTradingViewChart(symbol, interval);
+    }, 100);
+  } else {
+    initTradingViewChart(symbol, interval);
+  }
+  
+  addLogEntry('INFO', 0, null, `[GRÁFICO] Timeframe: ${interval}min`);
+}
+
+function toggleIndicator(indicator) {
+  chartIndicators[indicator] = !chartIndicators[indicator];
+  
+  // Update button state
+  const btn = $(`btn${indicator}`);
+  if (btn) {
+    if (chartIndicators[indicator]) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  }
+  
+  // Update chart
+  updateChart();
+  
+  const status = chartIndicators[indicator] ? 'ativado' : 'desativado';
+  addLogEntry('INFO', 0, null, `[INDICADOR] ${indicator} ${status}`);
+}
+
 // ─────────────────────────────────────────────
 //  UTILS & SELECTORS
 // ─────────────────────────────────────────────
@@ -1456,10 +1677,21 @@ function setupPriceModeToggle() {
   if (symbolSelect) {
     symbolSelect.addEventListener('change', () => {
       localStorage.setItem('scalpcalc_symbol', symbolSelect.value);
+      
+      // Update chart symbol
+      const chartSymbol = $('chartSymbol');
+      if (chartSymbol) {
+        chartSymbol.textContent = symbolSelect.value.replace('USDT', '/USDT');
+      }
+      
       if (toggle.checked) {
         retryCount = 0;
         refreshAllData();
       }
+      
+      // Update TradingView chart
+      updateChart();
+      
       addLogEntry('INFO', 0, null, `[SISTEMA] Par: ${symbolSelect.value}`);
     });
   }
@@ -1976,7 +2208,7 @@ function addLogEntry(signal, entryPrice, score, prefix = null) {
   entry.innerHTML = `<span class="log-time">${time}</span><span class="log-msg ${signalClass}">${msg}</span>`;
   
   logList.insertBefore(entry, logList.firstChild);
-  if (logList.children.length > 12) logList.removeChild(logList.lastChild);
+  if (logList.children.length > 10) logList.removeChild(logList.lastChild);
 }
 
 function triggerHaptic(pattern = [10, 50, 10]) {
@@ -2002,12 +2234,18 @@ function setupMobileUX() {
 //  INITIALIZATION
 // ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('[INIT] ScalpCalc MT v5.0 carregado');
+  console.log('[INIT] ScalpCalc MT v6.0 carregado');
   console.log('[INIT] Timeout: 15s | Max retries: 3');
   
   recalc();
   setupPriceModeToggle();
   setupMobileUX();
+  
+  // Initialize TradingView chart
+  const symbol = $('symbolSelect')?.value || 'BTCUSDT';
+  setTimeout(() => {
+    initTradingViewChart(symbol, '15');
+  }, 500);
   
   addLogEntry('INFO', 0, null, '[SISTEMA] Multi-timeframe pronto');
 });
