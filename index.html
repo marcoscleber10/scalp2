@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no">
 <meta name="description" content="ScalpCalc – Ferramenta educativa para scalp trading multi-timeframe">
-<title>ScalpCalc – Robot Mode MT</title>
+<title>ScalpCalc – MT Mode</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -92,6 +92,11 @@
     background: var(--green);
     box-shadow: 0 0 10px var(--green);
     animation: pulse 1.8s ease-in-out infinite;
+  }
+  .status-dot.offline {
+    background: var(--red);
+    box-shadow: 0 0 10px var(--red);
+    animation: none;
   }
   @keyframes pulse {
     0%,100% { opacity: 1; transform: scale(1); }
@@ -236,6 +241,15 @@
     padding: 6px 10px;
     font-size: 0.75rem;
   }
+  .btn-danger {
+    background: rgba(255,59,92,.1);
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .btn-danger:hover:not(:disabled) {
+    background: rgba(255,59,92,.2);
+    box-shadow: var(--glow-r);
+  }
 
   .metric {
     display: flex;
@@ -282,6 +296,10 @@
   .signal-box.neutral {
     border-color: var(--yellow);
     background: rgba(255,204,0,.04);
+  }
+  .signal-box.loading {
+    border-color: var(--accent);
+    background: rgba(0,229,255,.04);
   }
   .signal-icon { font-size: 2rem; line-height: 1; margin-bottom: 4px; }
   .signal-text {
@@ -396,6 +414,7 @@
   .log-msg.neu  { color: var(--yellow); }
   .log-msg.info { color: var(--accent); }
   .log-msg.error { color: var(--red); }
+  .log-msg.warn { color: var(--yellow); }
   #logList { max-height: 160px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
   .spinner {
@@ -506,11 +525,12 @@
     align-items: center;
     gap: 8px;
     margin-top: 8px;
-    padding: 6px 10px;
+    padding: 8px 12px;
     background: rgba(0,255,136,.05);
     border-radius: 4px;
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     color: var(--text2);
+    border: 1px solid rgba(0,255,136,.2);
   }
   .api-status-dot {
     width: 6px;
@@ -520,14 +540,20 @@
     box-shadow: 0 0 8px var(--green);
     animation: pulse 2s ease-in-out infinite;
   }
-  .api-status.error .api-status-dot {
+  .api-status.offline .api-status-dot {
     background: var(--red);
     box-shadow: 0 0 8px var(--red);
     animation: none;
   }
-  .api-status.error {
+  .api-status.offline {
     background: rgba(255,59,92,.05);
     color: var(--red);
+    border-color: rgba(255,59,92,.2);
+  }
+  .api-status.warning {
+    background: rgba(255,204,0,.05);
+    color: var(--yellow);
+    border-color: rgba(255,204,0,.2);
   }
   .api-timer {
     margin-left: auto;
@@ -550,6 +576,11 @@
     background: rgba(0,229,255,.15);
     color: var(--accent);
     border: 1px solid rgba(0,229,255,.3);
+  }
+  .price-badge.offline {
+    background: rgba(255,204,0,.15);
+    color: var(--yellow);
+    border-color: rgba(255,204,0,.3);
   }
   
   .symbol-selector {
@@ -678,21 +709,51 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+    border: 1px solid;
   }
   .confluence-alert.confluence {
     background: rgba(0,255,136,.08);
-    border: 1px solid var(--green);
+    border-color: var(--green);
     color: var(--green);
   }
   .confluence-alert.conflict {
     background: rgba(255,59,92,.08);
-    border: 1px solid var(--red);
+    border-color: var(--red);
     color: var(--red);
   }
   .confluence-alert.neutral {
     background: rgba(255,204,0,.06);
-    border: 1px solid var(--yellow);
+    border-color: var(--yellow);
     color: var(--yellow);
+  }
+  .confluence-alert.offline {
+    background: rgba(255,204,0,.06);
+    border-color: var(--yellow);
+    color: var(--yellow);
+  }
+
+  /* Error Banner */
+  .error-banner {
+    background: rgba(255,59,92,.08);
+    border: 1px solid var(--red);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8rem;
+    color: var(--red);
+  }
+  .error-banner-icon {
+    font-size: 1.2rem;
+  }
+  .error-banner-text {
+    flex: 1;
+  }
+  .error-banner button {
+    font-size: 0.75rem;
+    padding: 6px 12px;
   }
 
   /* ── Mobile Enhancements ── */
@@ -791,7 +852,8 @@
   <header>
     <div class="logo">SCALP<span>CALC</span> // <span style="color:var(--accent)">MT MODE</span></div>
     <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--text2);">
-      <div class="status-dot"></div> <span id="statusText">SCALP 1min + 15min</span>
+      <div class="status-dot" id="statusDot"></div> 
+      <span id="statusText">SCALP 1min + 15min</span>
     </div>
   </header>
 
@@ -806,6 +868,16 @@
       📌 Stop: 1.2% &nbsp;&nbsp;&nbsp; 
       🎯 Take: 1.8%
     </div>
+  </div>
+
+  <!-- Error Banner (hidden by default) -->
+  <div class="error-banner hidden" id="errorBanner">
+    <div class="error-banner-icon">⚠️</div>
+    <div class="error-banner-text">
+      <strong>API Binance indisponível</strong><br>
+      <span id="errorBannerText">Usando último preço válido ou modo manual</span>
+    </div>
+    <button class="btn-danger btn-small" onclick="forceManualMode()">Forçar Manual</button>
   </div>
 
   <!-- Row 1: Inputs -->
@@ -847,7 +919,7 @@
 
     <!-- API Status -->
     <div class="api-status hidden" id="apiStatus">
-      <div class="api-status-dot"></div>
+      <div class="api-status-dot" id="apiStatusDot"></div>
       <span id="apiStatusText">Binance API conectada</span>
       <span class="api-timer" id="apiTimer">--s</span>
     </div>
@@ -1019,13 +1091,23 @@
 // ─────────────────────────────────────────────
 //  UTILS & SELECTORS
 // ─────────────────────────────────────────────
-const $ = id => document.getElementById(id);
+const $ = id => {
+  const el = document.getElementById(id);
+  if (!el) {
+    console.error(`[DOM] Elemento não encontrado: ${id}`);
+  }
+  return el;
+};
 
 // Binance API config
 const BINANCE_API = 'https://api.binance.com/api/v3';
+const REQUEST_TIMEOUT = 15000; // 15 segundos
+
 let autoUpdateInterval = null;
 let countdownInterval = null;
 let countdown = 10;
+let retryCount = 0;
+const MAX_RETRIES = 3;
 
 // Store for timeframe data
 const tfData = {
@@ -1033,84 +1115,253 @@ const tfData = {
   '15m': { indicators: null, signal: null, score: null, lastUpdate: null }
 };
 
+// Last valid price
+let lastValidPrice = null;
+let apiErrorCount = 0;
+const MAX_API_ERRORS = 3;
+
+// ─────────────────────────────────────────────
+//  FETCH WITH TIMEOUT
+// ─────────────────────────────────────────────
+async function fetchWithTimeout(url, timeout = REQUEST_TIMEOUT) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const response = await fetch(url, { 
+      signal: controller.signal,
+      headers: { 'Accept': 'application/json' }
+    });
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('Timeout: Requisição demorou mais que 15s');
+    }
+    throw error;
+  }
+}
+
 // ─────────────────────────────────────────────
 //  BINANCE API INTEGRATION
 // ─────────────────────────────────────────────
-async function fetchBinancePrice() {
-  const symbol = $('symbolSelect').value;
-  
+async function fetchBinancePrice(symbol) {
   try {
-    const response = await fetch(`${BINANCE_API}/ticker/price?symbol=${symbol}`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    console.log(`[API] Buscando preço: ${symbol}`);
+    const data = await fetchWithTimeout(`${BINANCE_API}/ticker/price?symbol=${symbol}`);
     
-    const data = await response.json();
-    return parseFloat(data.price);
+    if (!data || !data.price) {
+      throw new Error('Resposta inválida da API');
+    }
+    
+    const price = parseFloat(data.price);
+    if (isNaN(price) || price <= 0) {
+      throw new Error(`Preço inválido: ${price}`);
+    }
+    
+    console.log(`[API] Preço obtido: $${price}`);
+    return price;
     
   } catch (error) {
-    console.error('❌ Binance price error:', error);
+    console.error(`[API] Erro ao buscar preço:`, error.message);
     throw error;
   }
 }
 
 async function fetchBinanceKlines(symbol, interval, limit = 50) {
   try {
-    const response = await fetch(`${BINANCE_API}/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    console.log(`[API] Buscando klines ${interval}: ${symbol}`);
+    const klines = await fetchWithTimeout(
+      `${BINANCE_API}/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`
+    );
     
-    const klines = await response.json();
+    if (!Array.isArray(klines) || klines.length === 0) {
+      throw new Error('Dados de klines inválidos');
+    }
     
     // Parse klines: [time, open, high, low, close, volume, ...]
-    return {
-      prices: klines.map(k => parseFloat(k[4])), // close price
-      volumes: klines.map(k => parseFloat(k[5])),
-      highs: klines.map(k => parseFloat(k[2])),
-      lows: klines.map(k => parseFloat(k[3])),
-      timestamps: klines.map(k => k[0])
+    const data = {
+      prices: [],
+      volumes: [],
+      highs: [],
+      lows: [],
+      timestamps: []
     };
     
+    for (const k of klines) {
+      const close = parseFloat(k[4]);
+      const volume = parseFloat(k[5]);
+      const high = parseFloat(k[2]);
+      const low = parseFloat(k[3]);
+      
+      if (!isNaN(close)) data.prices.push(close);
+      if (!isNaN(volume)) data.volumes.push(volume);
+      if (!isNaN(high)) data.highs.push(high);
+      if (!isNaN(low)) data.lows.push(low);
+      data.timestamps.push(k[0]);
+    }
+    
+    if (data.prices.length < 10) {
+      throw new Error(`Dados insuficientes: apenas ${data.prices.length} candles`);
+    }
+    
+    console.log(`[API] Klines ${interval} obtidos: ${data.prices.length} candles`);
+    return data;
+    
   } catch (error) {
-    console.error(`❌ Binance klines error (${interval}):`, error);
+    console.error(`[API] Erro ao buscar klines ${interval}:`, error.message);
     throw error;
   }
 }
 
 async function fetchAllTimeframeData(symbol) {
-  // Fetch both timeframes in parallel
-  const [price, data1m, data15m] = await Promise.all([
-    fetchBinancePrice(),
-    fetchBinanceKlines(symbol, '1m'),
-    fetchBinanceKlines(symbol, '15m')
-  ]);
+  console.log(`[API] Iniciando fetch para ${symbol}`);
   
-  return { price, data1m, data15m };
+  try {
+    const [price, data1m, data15m] = await Promise.all([
+      fetchBinancePrice(symbol),
+      fetchBinanceKlines(symbol, '1m'),
+      fetchBinanceKlines(symbol, '15m')
+    ]);
+    
+    console.log('[API] Todos os dados obtidos com sucesso');
+    return { price, data1m, data15m };
+    
+  } catch (error) {
+    console.error('[API] Falha ao buscar dados:', error.message);
+    throw error;
+  }
+}
+
+// ─────────────────────────────────────────────
+//  FALLBACK DATA (SIMULATED)
+// ─────────────────────────────────────────────
+function generateFallbackData(basePrice) {
+  console.log('[FALLBACK] Gerando dados simulados');
+  
+  const generatePrices = (base, count, volatility = 0.002) => {
+    const prices = [base];
+    for (let i = 1; i < count; i++) {
+      const change = (Math.random() - 0.5) * volatility * base;
+      prices.push(prices[i-1] + change);
+    }
+    return prices;
+  };
+  
+  const generateVolumes = (count) => {
+    return Array.from({length: count}, () => Math.random() * 1000 + 100);
+  };
+  
+  return {
+    price: basePrice,
+    data1m: {
+      prices: generatePrices(basePrice, 50, 0.001),
+      volumes: generateVolumes(50),
+      highs: generatePrices(basePrice * 1.001, 50, 0.001),
+      lows: generatePrices(basePrice * 0.999, 50, 0.001),
+      timestamps: Array.from({length: 50}, (_, i) => Date.now() - (50-i)*60*1000)
+    },
+    data15m: {
+      prices: generatePrices(basePrice, 50, 0.003),
+      volumes: generateVolumes(50),
+      highs: generatePrices(basePrice * 1.003, 50, 0.003),
+      lows: generatePrices(basePrice * 0.997, 50, 0.003),
+      timestamps: Array.from({length: 50}, (_, i) => Date.now() - (50-i)*15*60*1000)
+    }
+  };
+}
+
+// ─────────────────────────────────────────────
+//  UI UPDATE FUNCTIONS
+// ─────────────────────────────────────────────
+function safeUpdateText(id, text) {
+  const el = $(id);
+  if (el) {
+    el.textContent = text;
+  }
 }
 
 function showApiStatus(status, text) {
   const statusEl = $('apiStatus');
   const statusText = $('apiStatusText');
+  const statusDot = $('apiStatusDot');
+  const statusDotMain = $('statusDot');
   
-  statusEl.classList.remove('hidden', 'error');
-  statusText.textContent = text;
+  if (!statusEl || !statusText) return;
+  
+  statusEl.classList.remove('hidden', 'offline', 'warning');
   
   if (status === 'error') {
-    statusEl.classList.add('error');
+    statusEl.classList.add('offline');
+    if (statusDot) statusDot.style.background = 'var(--red)';
+    if (statusDotMain) statusDotMain.classList.add('offline');
+  } else if (status === 'warning') {
+    statusEl.classList.add('warning');
+    if (statusDot) statusDot.style.background = 'var(--yellow)';
+    if (statusDotMain) statusDotMain.classList.remove('offline');
+  } else {
+    if (statusDot) statusDot.style.background = 'var(--green)';
+    if (statusDotMain) statusDotMain.classList.remove('offline');
   }
+  
+  statusText.textContent = text;
+}
+
+function showErrorBanner(message) {
+  const banner = $('errorBanner');
+  const bannerText = $('errorBannerText');
+  
+  if (banner && bannerText) {
+    banner.classList.remove('hidden');
+    bannerText.textContent = message;
+  }
+}
+
+function hideErrorBanner() {
+  const banner = $('errorBanner');
+  if (banner) {
+    banner.classList.add('hidden');
+  }
+}
+
+function forceManualMode() {
+  const toggle = $('priceModeToggle');
+  if (toggle && toggle.checked) {
+    toggle.checked = false;
+    toggle.dispatchEvent(new Event('change'));
+  }
+  hideErrorBanner();
+  addLogEntry('INFO', 0, null, '[SISTEMA] Modo manual forçado pelo usuário');
 }
 
 function startAutoUpdate() {
   if (autoUpdateInterval) clearInterval(autoUpdateInterval);
   if (countdownInterval) clearInterval(countdownInterval);
   
+  retryCount = 0;
   refreshAllData();
   
   autoUpdateInterval = setInterval(() => {
-    refreshAllData();
-    countdown = 10;
+    if (retryCount < MAX_RETRIES) {
+      refreshAllData();
+      countdown = 10;
+    } else {
+      console.log('[AUTO] Máximo de retries atingido, parando auto-update');
+      stopAutoUpdate();
+      showApiStatus('error', 'Múltiplas falhas - use modo manual');
+      showErrorBanner('API falhou 3 vezes consecutivas. Use o modo manual.');
+    }
   }, 10000);
   
   countdownInterval = setInterval(() => {
     countdown--;
-    $('apiTimer').textContent = `${countdown}s`;
+    safeUpdateText('apiTimer', `${countdown}s`);
     if (countdown < 0) countdown = 10;
   }, 1000);
 }
@@ -1118,7 +1369,7 @@ function startAutoUpdate() {
 function stopAutoUpdate() {
   if (autoUpdateInterval) clearInterval(autoUpdateInterval);
   if (countdownInterval) clearInterval(countdownInterval);
-  $('apiTimer').textContent = '--s';
+  safeUpdateText('apiTimer', '--s');
 }
 
 // ─────────────────────────────────────────────
@@ -1130,63 +1381,95 @@ function setupPriceModeToggle() {
   const modeText = $('modeText');
   const autoBadge = $('autoBadge');
   
+  if (!toggle || !entryPrice || !modeText) {
+    console.error('[INIT] Elementos do toggle não encontrados');
+    return;
+  }
+  
+  // Load saved preference
   const savedMode = localStorage.getItem('scalpcalc_priceMode');
   const savedSymbol = localStorage.getItem('scalpcalc_symbol');
+  const savedLastPrice = localStorage.getItem('scalpcalc_lastPrice');
   
-  if (savedSymbol) $('symbolSelect').value = savedSymbol;
+  if (savedSymbol) {
+    const select = $('symbolSelect');
+    if (select) select.value = savedSymbol;
+  }
+  
+  if (savedLastPrice) {
+    lastValidPrice = parseFloat(savedLastPrice);
+    console.log(`[INIT] Último preço válido carregado: $${lastValidPrice}`);
+  }
   
   if (savedMode === 'auto') {
     toggle.checked = true;
     modeText.textContent = '🔄 AUTO';
     modeText.className = 'toggle-mode-text auto';
     entryPrice.disabled = true;
-    autoBadge.classList.remove('hidden');
+    if (autoBadge) autoBadge.classList.remove('hidden');
     startAutoUpdate();
   } else {
     toggle.checked = false;
     modeText.textContent = '🔧 MANUAL';
     modeText.className = 'toggle-mode-text manual';
     entryPrice.disabled = false;
-    autoBadge.classList.add('hidden');
-    $('apiStatus').classList.add('hidden');
+    if (autoBadge) autoBadge.classList.add('hidden');
+    const apiStatus = $('apiStatus');
+    if (apiStatus) apiStatus.classList.add('hidden');
     stopAutoUpdate();
   }
   
+  // Toggle handler
   toggle.addEventListener('change', (e) => {
     if (e.target.checked) {
+      // Switch to AUTO
       modeText.textContent = '🔄 AUTO';
       modeText.className = 'toggle-mode-text auto';
       entryPrice.disabled = true;
-      autoBadge.classList.remove('hidden');
-      $('apiStatus').classList.remove('hidden');
+      if (autoBadge) autoBadge.classList.remove('hidden');
+      const apiStatus = $('apiStatus');
+      if (apiStatus) apiStatus.classList.remove('hidden');
+      
       localStorage.setItem('scalpcalc_priceMode', 'auto');
       startAutoUpdate();
       addLogEntry('INFO', 0, null, '[SISTEMA] Modo AUTOMÁTICO ativado');
+      
     } else {
+      // Switch to MANUAL
       modeText.textContent = '🔧 MANUAL';
       modeText.className = 'toggle-mode-text manual';
       entryPrice.disabled = false;
-      autoBadge.classList.add('hidden');
-      $('apiStatus').classList.add('hidden');
+      if (autoBadge) autoBadge.classList.add('hidden');
+      const apiStatus = $('apiStatus');
+      if (apiStatus) apiStatus.classList.add('hidden');
+      
       localStorage.setItem('scalpcalc_priceMode', 'manual');
       stopAutoUpdate();
+      hideErrorBanner();
       addLogEntry('INFO', 0, null, '[SISTEMA] Modo MANUAL ativado');
     }
     entryPrice.focus();
   });
   
-  $('symbolSelect').addEventListener('change', () => {
-    localStorage.setItem('scalpcalc_symbol', $('symbolSelect').value);
-    if (toggle.checked) refreshAllData();
-    addLogEntry('INFO', 0, null, `[SISTEMA] Par: ${$('symbolSelect').value}`);
-  });
+  // Symbol change handler
+  const symbolSelect = $('symbolSelect');
+  if (symbolSelect) {
+    symbolSelect.addEventListener('change', () => {
+      localStorage.setItem('scalpcalc_symbol', symbolSelect.value);
+      if (toggle.checked) {
+        retryCount = 0;
+        refreshAllData();
+      }
+      addLogEntry('INFO', 0, null, `[SISTEMA] Par: ${symbolSelect.value}`);
+    });
+  }
 }
 
 // ─────────────────────────────────────────────
 //  INDICATOR CALCULATIONS
 // ─────────────────────────────────────────────
 function calculateRSI(prices, period = 14) {
-  if (prices.length < period + 1) return 50;
+  if (!prices || prices.length < period + 1) return 50;
   
   let gains = 0, losses = 0;
   for (let i = prices.length - period; i < prices.length; i++) {
@@ -1204,6 +1487,8 @@ function calculateRSI(prices, period = 14) {
 }
 
 function calculateVWAP(data) {
+  if (!data || !data.prices || !data.volumes) return null;
+  
   let cumulativeTPV = 0, cumulativeVol = 0;
   
   for (let i = 0; i < data.prices.length; i++) {
@@ -1216,7 +1501,7 @@ function calculateVWAP(data) {
 }
 
 function calculateTrend(prices, shortPeriod = 9, longPeriod = 21) {
-  if (prices.length < longPeriod) return 'LATERAL';
+  if (!prices || prices.length < longPeriod) return 'LATERAL';
   
   const shortMA = prices.slice(-shortPeriod).reduce((a, b) => a + b, 0) / shortPeriod;
   const longMA = prices.slice(-longPeriod).reduce((a, b) => a + b, 0) / longPeriod;
@@ -1228,7 +1513,7 @@ function calculateTrend(prices, shortPeriod = 9, longPeriod = 21) {
 }
 
 function calculateVolatility(prices, period = 14) {
-  if (prices.length < period) return 'MÉDIA';
+  if (!prices || prices.length < period) return 'MÉDIA';
   
   const slice = prices.slice(-period);
   const mean = slice.reduce((a, b) => a + b, 0) / period;
@@ -1242,13 +1527,18 @@ function calculateVolatility(prices, period = 14) {
 }
 
 function calculateMomentum(prices, period = 10) {
-  if (prices.length < period) return 0;
+  if (!prices || prices.length < period) return 0;
   const current = prices[prices.length - 1];
   const past = prices[prices.length - period];
   return parseFloat(((current - past) / past * 100).toFixed(2));
 }
 
 function calculateIndicators(data, entryPrice) {
+  if (!data || !data.prices) {
+    console.error('[INDICATORS] Dados inválidos');
+    return null;
+  }
+  
   return {
     rsi: calculateRSI(data.prices),
     vwap: calculateVWAP(data),
@@ -1263,6 +1553,8 @@ function calculateIndicators(data, entryPrice) {
 //  SCORE & SIGNAL LOGIC
 // ─────────────────────────────────────────────
 function calculateConfluenceScore(ind, entryPrice) {
+  if (!ind) return 50;
+  
   let score = 50;
   
   // RSI weighting
@@ -1272,8 +1564,8 @@ function calculateConfluenceScore(ind, entryPrice) {
   else if (ind.rsi > 55) score -= 12;
   
   // VWAP weighting
-  if (entryPrice < ind.vwap * 0.995) score += 15;
-  else if (entryPrice > ind.vwap * 1.005) score -= 15;
+  if (ind.vwap && entryPrice < ind.vwap * 0.995) score += 15;
+  else if (ind.vwap && entryPrice > ind.vwap * 1.005) score -= 15;
   
   // Trend weighting
   if (ind.trend === 'ALTA') score += 20;
@@ -1290,6 +1582,8 @@ function calculateConfluenceScore(ind, entryPrice) {
 }
 
 function determineSignal(ind, score) {
+  if (!ind) return 'NEUTRAL';
+  
   if (score >= 72 && ind.rsi < 52 && ind.trend !== 'BAIXA') return 'BUY';
   if (score <= 28 && ind.rsi > 48 && ind.trend !== 'ALTA') return 'SELL';
   return 'NEUTRAL';
@@ -1321,10 +1615,18 @@ function analyzeConfluence(signal1m, signal15m, score1m, score15m) {
 }
 
 // ─────────────────────────────────────────────
-//  UI UPDATE FUNCTIONS
+//  UI UPDATE FOR TIMEFRAMES
 // ─────────────────────────────────────────────
 function updateTFSignalUI(tf, signal, score, indicators) {
   const prefix = tf === '1m' ? '' : '15m';
+  
+  // Update indicators safely
+  safeUpdateText(`indRsi${prefix}`, indicators?.rsi ?? '--');
+  safeUpdateText(`indVwap${prefix}`, indicators?.vwap ? '$' + indicators.vwap.toLocaleString('en-US', {minimumFractionDigits:0}) : '--');
+  safeUpdateText(`indTrend${prefix}`, indicators?.trend ?? '--');
+  safeUpdateText(`indVol${prefix}`, indicators?.volatility ?? '--');
+  
+  // Update signal box
   const signalBox = $(`signalBox${prefix}`);
   const icon = $(`signalIcon${prefix}`);
   const text = $(`signalText${prefix}`);
@@ -1332,29 +1634,30 @@ function updateTFSignalUI(tf, signal, score, indicators) {
   const scoreFill = $(`scoreFill${prefix}`);
   const scoreText = $(`scoreText${prefix}`);
   
-  // Update indicators
-  $(`indRsi${prefix}`).textContent = indicators.rsi;
-  $(`indVwap${prefix}`).textContent = '$' + indicators.vwap?.toLocaleString('en-US', {minimumFractionDigits:0});
-  $(`indTrend${prefix}`).textContent = indicators.trend;
-  $(`indVol${prefix}`).textContent = indicators.volatility;
-  
-  // Update signal box
-  signalBox.className = 'signal-box ' + (signal === 'BUY' ? 'buy' : signal === 'SELL' ? 'sell' : 'neutral');
-  icon.textContent = signal === 'BUY' ? '🟢' : signal === 'SELL' ? '🔴' : '🟡';
-  text.textContent = signal === 'BUY' ? 'COMPRA' : signal === 'SELL' ? 'VENDA' : 'AGUARDAR';
-  sub.textContent = `Score: ${score}/100`;
+  if (signalBox) {
+    signalBox.className = 'signal-box ' + (signal === 'BUY' ? 'buy' : signal === 'SELL' ? 'sell' : 'neutral');
+  }
+  if (icon) icon.textContent = signal === 'BUY' ? '🟢' : signal === 'SELL' ? '🔴' : '🟡';
+  if (text) text.textContent = signal === 'BUY' ? 'COMPRA' : signal === 'SELL' ? 'VENDA' : 'AGUARDAR';
+  if (sub) sub.textContent = `Score: ${score}/100`;
   
   // Update score bar
-  scoreFill.style.width = `${score}%`;
-  scoreFill.style.background = signal === 'BUY' ? 'var(--green)' : signal === 'SELL' ? 'var(--red)' : 'var(--yellow)';
-  scoreText.textContent = score;
-  scoreText.style.color = scoreFill.style.background;
+  if (scoreFill) {
+    scoreFill.style.width = `${score}%`;
+    scoreFill.style.background = signal === 'BUY' ? 'var(--green)' : signal === 'SELL' ? 'var(--red)' : 'var(--yellow)';
+  }
+  if (scoreText) {
+    scoreText.textContent = score;
+    scoreText.style.color = scoreFill?.style.background || 'var(--accent)';
+  }
 }
 
 function updateConfluenceAlert(analysis) {
   const alert = $('confluenceAlert');
   const icon = $('confluenceIcon');
   const text = $('confluenceText');
+  
+  if (!alert || !icon || !text) return;
   
   alert.className = 'confluence-alert ' + analysis.type;
   icon.textContent = analysis.icon;
@@ -1365,44 +1668,74 @@ function showLoadingState(tf = null) {
   const prefixes = tf ? [tf === '1m' ? '' : '15m'] : ['', '15m'];
   
   prefixes.forEach(prefix => {
-    $(`indRsi${prefix}`).textContent = '...';
-    $(`indVwap${prefix}`).textContent = '...';
-    $(`indTrend${prefix}`).textContent = '...';
-    $(`indVol${prefix}`).textContent = '...';
-    $(`signalIcon${prefix}`).textContent = '🔄';
-    $(`signalText${prefix}`).textContent = 'ANALISANDO';
-    $(`signalSub${prefix}`).textContent = 'Score: --';
-    $(`scoreFill${prefix}`).style.width = '0%';
-    $(`scoreText${prefix}`).textContent = '--';
+    safeUpdateText(`indRsi${prefix}`, '...');
+    safeUpdateText(`indVwap${prefix}`, '...');
+    safeUpdateText(`indTrend${prefix}`, '...');
+    safeUpdateText(`indVol${prefix}`, '...');
+    
+    const signalBox = $(`signalBox${prefix}`);
+    if (signalBox) {
+      signalBox.classList.add('loading');
+    }
+    safeUpdateText(`signalIcon${prefix}`, '🔄');
+    safeUpdateText(`signalText${prefix}`, 'ANALISANDO');
+    safeUpdateText(`signalSub${prefix}`, 'Score: --');
+    
+    const scoreFill = $(`scoreFill${prefix}`);
+    if (scoreFill) scoreFill.style.width = '0%';
+    safeUpdateText(`scoreText${prefix}`, '--');
   });
 }
 
 // ─────────────────────────────────────────────
-//  MAIN SCAN FUNCTION
+//  MAIN REFRESH FUNCTION
 // ─────────────────────────────────────────────
 async function refreshAllData() {
-  const symbol = $('symbolSelect').value;
+  const symbolSelect = $('symbolSelect');
   const refreshBtn = $('refreshBtn');
+  const priceInput = $('entryPrice');
+  
+  if (!symbolSelect) {
+    console.error('[REFRESH] Symbol select não encontrado');
+    return;
+  }
+  
+  const symbol = symbolSelect.value;
   
   try {
-    refreshBtn.disabled = true;
-    showApiStatus('loading', 'Atualizando dados...');
+    if (refreshBtn) refreshBtn.disabled = true;
+    showApiStatus('loading', 'Atualizando...');
     showLoadingState();
+    hideErrorBanner();
+    
+    console.log(`[REFRESH] Iniciando para ${symbol}`);
     
     // Fetch data from Binance
     const { price, data1m, data15m } = await fetchAllTimeframeData(symbol);
     
+    // Success - reset error count
+    apiErrorCount = 0;
+    retryCount = 0;
+    lastValidPrice = price;
+    
+    // Save to localStorage
+    localStorage.setItem('scalpcalc_lastPrice', price.toString());
+    
     // Update price if in auto mode
-    if ($('priceModeToggle').checked) {
-      $('entryPrice').value = price.toFixed(2);
+    if (priceInput && $('priceModeToggle')?.checked) {
+      priceInput.value = price.toFixed(2);
       recalc();
     }
     
     // Calculate indicators for both timeframes
-    const entryPrice = parseFloat($('entryPrice').value) || price;
+    const entryPrice = parseFloat(priceInput?.value) || price;
     
     const ind1m = calculateIndicators(data1m, entryPrice);
     const ind15m = calculateIndicators(data15m, entryPrice);
+    
+    if (!ind1m || !ind15m) {
+      throw new Error('Falha ao calcular indicadores');
+    }
     
     // Calculate scores and signals
     const score1m = calculateConfluenceScore(ind1m, entryPrice);
@@ -1430,19 +1763,73 @@ async function refreshAllData() {
     showApiStatus('success', `Binance • ${symbol}`);
     countdown = 10;
     
+    console.log('[REFRESH] Concluído com sucesso');
+    
   } catch (error) {
-    console.error('❌ Error refreshing data:', error);
-    showApiStatus('error', 'Erro na API Binance');
-    addLogEntry('ERROR', 0, 0, `[SISTEMA] Falha: ${error.message}`);
+    console.error('[REFRESH] Erro:', error.message);
+    apiErrorCount++;
+    retryCount++;
+    
+    const errorMsg = `API falhou (${retryCount}/${MAX_RETRIES}): ${error.message}`;
+    console.error(errorMsg);
+    
+    if (apiErrorCount >= MAX_API_ERRORS) {
+      showApiStatus('error', 'API indisponível - use modo manual');
+      showErrorBanner(`API Binance falhou ${apiErrorCount} vezes. ${lastValidPrice ? 'Último preço mantido.' : 'Use modo manual.'}`);
+      addLogEntry('ERROR', 0, 0, `[SISTEMA] ${errorMsg}`);
+      
+      // Use fallback data if we have a last valid price
+      if (lastValidPrice) {
+        console.log('[FALLBACK] Usando último preço válido:', lastValidPrice);
+        const fallback = generateFallbackData(lastValidPrice);
+        await processFallbackData(fallback, entryPrice);
+      }
+    } else {
+      showApiStatus('warning', `Tentativa ${retryCount}/${MAX_RETRIES}`);
+      addLogEntry('WARN', 0, null, `[SISTEMA] ${errorMsg}`);
+    }
+    
   } finally {
-    refreshBtn.disabled = false;
+    if (refreshBtn) refreshBtn.disabled = false;
   }
 }
 
+async function processFallbackData(fallback, entryPrice) {
+  try {
+    const ind1m = calculateIndicators(fallback.data1m, entryPrice);
+    const ind15m = calculateIndicators(fallback.data15m, entryPrice);
+    
+    if (!ind1m || !ind15m) return;
+    
+    const score1m = calculateConfluenceScore(ind1m, entryPrice);
+    const score15m = calculateConfluenceScore(ind15m, entryPrice);
+    
+    const signal1m = determineSignal(ind1m, score1m);
+    const signal15m = determineSignal(ind15m, score15m);
+    
+    tfData['1m'] = { indicators: ind1m, signal: signal1m, score: score1m, lastUpdate: Date.now() };
+    tfData['15m'] = { indicators: ind15m, signal: signal15m, score: score15m, lastUpdate: Date.now() };
+    
+    updateTFSignalUI('1m', signal1m, score1m, ind1m);
+    updateTFSignalUI('15m', signal15m, score15m, ind15m);
+    updateConfluenceAlert(analyzeConfluence(signal1m, signal15m, score1m, score15m));
+    
+    addLogEntry('INFO', entryPrice, null, '[FALLBACK] Dados simulados gerados');
+    
+  } catch (err) {
+    console.error('[FALLBACK] Erro ao processar:', err);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  SCAN FUNCTION
+// ─────────────────────────────────────────────
 async function runScan() {
   const btn = $('scanBtn');
   const btnLabel = $('btnLabel');
   const btnSpinner = $('btnSpinner');
+  
+  if (!btn || !btnLabel || !btnSpinner) return;
   
   btn.disabled = true;
   btnLabel.classList.add('hidden');
@@ -1451,21 +1838,30 @@ async function runScan() {
   try {
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    // If in auto mode and no data yet, fetch from API
-    if ($('priceModeToggle').checked && !tfData['1m'].indicators) {
-      await refreshAllData();
-    }
-    
-    // Use stored data or simulate if not available
-    const entryPrice = parseFloat($('entryPrice').value) || 67000;
+    const priceInput = $('entryPrice');
+    const entryPrice = parseFloat(priceInput?.value) || 67000;
     
     // If we have real data, use it; otherwise simulate
     if (tfData['1m'].indicators && tfData['15m'].indicators) {
       // Already updated by refreshAllData
+      console.log('[SCAN] Usando dados existentes');
     } else {
       // Simulate for demo purposes
-      const ind1m = { rsi: 28 + Math.random()*44, vwap: entryPrice*0.998, trend: 'ALTA', volatility: 'MÉDIA', momentum: 0.3 };
-      const ind15m = { rsi: 45 + Math.random()*30, vwap: entryPrice*1.002, trend: 'LATERAL', volatility: 'BAIXA', momentum: -0.1 };
+      console.log('[SCAN] Gerando dados simulados');
+      const ind1m = { 
+        rsi: 28 + Math.random()*44, 
+        vwap: entryPrice*0.998, 
+        trend: 'ALTA', 
+        volatility: 'MÉDIA', 
+        momentum: 0.3 
+      };
+      const ind15m = { 
+        rsi: 45 + Math.random()*30, 
+        vwap: entryPrice*1.002, 
+        trend: 'LATERAL', 
+        volatility: 'BAIXA', 
+        momentum: -0.1 
+      };
       
       const score1m = calculateConfluenceScore(ind1m, entryPrice);
       const score15m = calculateConfluenceScore(ind15m, entryPrice);
@@ -1489,7 +1885,7 @@ async function runScan() {
     }
     
   } catch (error) {
-    console.error('❌ Scan error:', error);
+    console.error('[SCAN] Erro:', error);
     addLogEntry('ERROR', 0, 0, '[SCAN] Falha na análise');
   } finally {
     setTimeout(() => {
@@ -1504,29 +1900,41 @@ async function runScan() {
 //  PRICE CALCULATIONS
 // ─────────────────────────────────────────────
 function recalc() {
-  const entry = parseFloat($('entryPrice').value) || 0;
-  const stopPct = parseFloat($('stopPct').value) || 1.2;
-  const takePct = parseFloat($('takePct').value) || 1.8;
+  const entryInput = $('entryPrice');
+  const stopInput = $('stopPct');
+  const takeInput = $('takePct');
+  
+  if (!entryInput || !stopInput || !takeInput) return;
+  
+  const entry = parseFloat(entryInput.value) || 0;
+  const stopPct = parseFloat(stopInput.value) || 1.2;
+  const takePct = parseFloat(takeInput.value) || 1.8;
 
   const stopPrice = entry * (1 - stopPct / 100);
   const takePrice = entry * (1 + takePct / 100);
   const rr = stopPct > 0 ? (takePct / stopPct).toFixed(2) : '∞';
 
-  $('dispEntry').textContent = '$' + entry.toLocaleString('en-US', {minimumFractionDigits:2});
-  $('dispStop').textContent = '$' + stopPrice.toLocaleString('en-US', {minimumFractionDigits:2});
-  $('dispTake').textContent = '$' + takePrice.toLocaleString('en-US', {minimumFractionDigits:2});
-  $('dispRR').textContent = '1 : ' + rr;
+  safeUpdateText('dispEntry', '$' + entry.toLocaleString('en-US', {minimumFractionDigits:2}));
+  safeUpdateText('dispStop', '$' + stopPrice.toLocaleString('en-US', {minimumFractionDigits:2}));
+  safeUpdateText('dispTake', '$' + takePrice.toLocaleString('en-US', {minimumFractionDigits:2}));
+  safeUpdateText('dispRR', '1 : ' + rr);
 
   const total = stopPct + takePct;
-  if (total > 0) {
-    $('rrStop').style.width = (stopPct / total * 100) + '%';
-    $('rrTake').style.width = (takePct / total * 100) + '%';
+  const rrStop = $('rrStop');
+  const rrTake = $('rrTake');
+  
+  if (total > 0 && rrStop && rrTake) {
+    rrStop.style.width = (stopPct / total * 100) + '%';
+    rrTake.style.width = (takePct / total * 100) + '%';
   }
 }
 
 function setMode(stop, take) {
-  $('stopPct').value = stop;
-  $('takePct').value = take;
+  const stopInput = $('stopPct');
+  const takeInput = $('takePct');
+  
+  if (stopInput) stopInput.value = stop;
+  if (takeInput) takeInput.value = take;
   recalc();
 }
 
@@ -1551,7 +1959,7 @@ function addLogEntry(signal, entryPrice, score, prefix = null) {
   const time = new Date().toLocaleTimeString('pt-BR', {hour12: false});
   let msg = '';
   
-  if (signal === 'INFO' || signal === 'ERROR') {
+  if (signal === 'INFO' || signal === 'ERROR' || signal === 'WARN') {
     msg = entryPrice || '';
   } else {
     msg = `Sinal ${signal} • Score: ${score} • $${entryPrice}`;
@@ -1559,7 +1967,11 @@ function addLogEntry(signal, entryPrice, score, prefix = null) {
   
   if (prefix) msg = `${prefix} ${msg}`;
   
-  const signalClass = signal === 'BUY' ? 'buy' : signal === 'SELL' ? 'sell' : signal === 'ERROR' ? 'error' : signal === 'INFO' ? 'info' : 'neu';
+  const signalClass = signal === 'BUY' ? 'buy' : 
+                      signal === 'SELL' ? 'sell' : 
+                      signal === 'ERROR' ? 'error' : 
+                      signal === 'WARN' ? 'warn' :
+                      signal === 'INFO' ? 'info' : 'neu';
   
   entry.innerHTML = `<span class="log-time">${time}</span><span class="log-msg ${signalClass}">${msg}</span>`;
   
@@ -1590,22 +2002,24 @@ function setupMobileUX() {
 //  INITIALIZATION
 // ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('[INIT] ScalpCalc MT v5.0 carregado');
+  console.log('[INIT] Timeout: 15s | Max retries: 3');
+  
   recalc();
   setupPriceModeToggle();
   setupMobileUX();
   
-  console.log('🚀 ScalpCalc MT v4.0 carregado');
-  console.log('⚡ Timeframes: 1min + 15min para scalp trading');
-  
-  // Optional: Auto-scan on load if in auto mode
-  // setTimeout(() => { if ($('priceModeToggle').checked) refreshAllData(); }, 1500);
+  addLogEntry('INFO', 0, null, '[SISTEMA] Multi-timeframe pronto');
 });
 
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !$('scanBtn').disabled) {
-    e.preventDefault();
-    runScan();
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    const btn = $('scanBtn');
+    if (btn && !btn.disabled) {
+      e.preventDefault();
+      runScan();
+    }
   }
   if (e.target.tagName !== 'INPUT') {
     if (e.key === '1') setMode(0.8, 1.2);
