@@ -2,7 +2,10 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#060a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>ScalpCalc – Robot Mode</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -32,7 +35,6 @@
     overflow-x: hidden;
   }
 
-  /* ── Animated grid background ── */
   body::before {
     content: '';
     position: fixed; inset: 0;
@@ -44,16 +46,12 @@
     z-index: 0;
   }
 
-  /* ── Scan line effect ── */
   body::after {
     content: '';
     position: fixed; inset: 0;
     background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,.08) 2px,
-      rgba(0,0,0,.08) 4px
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,.08) 2px, rgba(0,0,0,.08) 4px
     );
     pointer-events: none;
     z-index: 0;
@@ -66,7 +64,6 @@
     padding: 16px;
   }
 
-  /* ── Header ── */
   header {
     display: flex;
     align-items: center;
@@ -98,15 +95,10 @@
     50%      { opacity: .4; transform: scale(.6); }
   }
 
-  /* ── Grid layout ── */
   .grid { display: grid; gap: 12px; }
   .grid-2 { grid-template-columns: 1fr 1fr; }
   .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
-  @media(max-width: 600px) {
-    .grid-2, .grid-3 { grid-template-columns: 1fr; }
-  }
 
-  /* ── Panel card ── */
   .card {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -131,7 +123,6 @@
     background: var(--border);
   }
 
-  /* ── Inputs ── */
   .field { margin-bottom: 12px; }
   label {
     display: block;
@@ -160,7 +151,6 @@
     box-shadow: 0 0 0 2px rgba(0,229,255,.12);
   }
 
-  /* ── Buttons ── */
   .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
   button {
     cursor: pointer;
@@ -223,7 +213,6 @@
   }
   .btn-scan:hover::after { transform: translateX(100%); }
 
-  /* ── Metric display ── */
   .metric {
     display: flex;
     align-items: baseline;
@@ -243,7 +232,6 @@
   .val-blue  { color: var(--accent); text-shadow: var(--glow); }
   .val-yellow{ color: var(--yellow); }
 
-  /* ── Signal box ── */
   .signal-box {
     border-radius: 6px;
     padding: 18px;
@@ -274,7 +262,6 @@
   }
   .signal-sub { font-size: .78rem; color: var(--text2); margin-top: 4px; }
 
-  /* ── Score arc ── */
   .score-wrap { text-align: center; padding: 8px 0 4px; }
   .score-arc {
     width: 120px; height: 70px;
@@ -290,7 +277,6 @@
   }
   .score-label { font-size: .72rem; color: var(--text2); letter-spacing: .1em; text-transform: uppercase; }
 
-  /* ── Indicator rows ── */
   .ind-row {
     display: flex;
     align-items: center;
@@ -313,7 +299,6 @@
   .badge-sell { background: rgba(255,59,92,.15);  color: var(--red);   border: 1px solid rgba(255,59,92,.3); }
   .badge-neu  { background: rgba(255,204,0,.12);  color: var(--yellow);border: 1px solid rgba(255,204,0,.3); }
 
-  /* ── RR bar ── */
   .rr-bar-wrap { margin-top: 10px; }
   .rr-bar-track {
     height: 8px;
@@ -327,7 +312,6 @@
   .rr-bar-take { background: var(--green); transition: width .4s; }
   .rr-labels { display: flex; justify-content: space-between; font-size: .72rem; color: var(--text2); margin-top: 4px; }
 
-  /* ── Ticker ── */
   .ticker-bar {
     background: #08111a;
     border: 1px solid var(--border);
@@ -349,7 +333,6 @@
     100% { transform: translateX(-50%); }
   }
 
-  /* ── History log ── */
   .log-entry {
     font-family: 'JetBrains Mono', monospace;
     font-size: .72rem;
@@ -365,7 +348,6 @@
   .log-msg.sell { color: var(--red); }
   .log-msg.neu  { color: var(--yellow); }
 
-  /* ── Binance API section ── */
   .api-notice {
     background: rgba(0,229,255,.04);
     border: 1px solid rgba(0,229,255,.2);
@@ -388,7 +370,6 @@
     word-break: break-all;
   }
 
-  /* ── Spinning loader ── */
   .spinner {
     display: inline-block;
     width: 14px; height: 14px;
@@ -401,6 +382,47 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .hidden { display: none; }
+
+  /* ── Mobile Enhancements ── */
+  @media (max-width: 600px) {
+    button, input, select { min-height: 44px; font-size: 1rem !important; }
+    .card { padding: 12px; border-radius: 8px; }
+    .card-title { font-size: 0.75rem; margin-bottom: 10px; }
+    input[type=number], select { font-size: 1rem; padding: 12px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr !important; gap: 10px !important; }
+    .signal-box { padding: 24px 16px; }
+    .signal-icon { font-size: 3rem; }
+    .signal-text { font-size: 1.2rem; }
+    .score-arc { width: 140px; height: 80px; }
+    .score-num { font-size: 2.4rem; }
+    .btn-scan { font-size: 1.1rem; padding: 14px; margin-top: 12px; }
+    #logList { max-height: 150px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .metric-value, .ind-val { min-height: 1.2em; }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body { background: var(--bg); color-scheme: dark; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    body::after { display: none; }
+  }
+
+  @media (hover: none) and (pointer: coarse) {
+    button:active { transform: scale(0.98); opacity: 0.9; }
+    .btn-scan:active::after { transform: translateX(100%) !important; }
+  }
+
+  .footer-disclaimer {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
+    border-top: 1px solid var(--border);
+    line-height: 1.5;
+  }
 </style>
 </head>
 <body>
@@ -578,14 +600,23 @@
     </div>
   </div>
 
+  <!-- Footer Disclaimer -->
+  <div class="footer-disclaimer">
+    🔐 <strong>Disclaimer:</strong> ScalpCalc é ferramenta educativa. Criptomoedas são ativos de alto risco.<br>
+    Nunca opere com capital que não pode perder. Este software não constitui recomendação financeira.
+  </div>
+
 </div>
 
 <script>
 // ─────────────────────────────────────────────
-//  Recalculates price targets whenever inputs change
+//  UTILS & SELECTORS
 // ─────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
+// ─────────────────────────────────────────────
+//  CÁLCULOS DE PREÇO E R/R
+// ─────────────────────────────────────────────
 function recalc() {
   const entry   = parseFloat($('entryPrice').value) || 0;
   const stopPct = parseFloat($('stopPct').value)    || 1.2;
@@ -600,7 +631,6 @@ function recalc() {
   $('dispTake').textContent  = '$' + takePrice.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
   $('dispRR').textContent    = '1 : ' + rr;
 
-  // RR bar
   const total = stopPct + takePct;
   $('rrStop').style.width = (stopPct / total * 100) + '%';
   $('rrTake').style.width = (takePct / total * 100) + '%';
@@ -612,151 +642,273 @@ function setMode(stop, take) {
   recalc();
 }
 
-['entryPrice','stopPct','takePct'].forEach(id => $( id ).addEventListener('input', recalc));
+['entryPrice','stopPct','takePct'].forEach(id => $(id).addEventListener('input', recalc));
 recalc();
 
 // ─────────────────────────────────────────────
-//  Simulate market indicators (replace with real API later)
+//  FUNÇÃO PRINCIPAL: runScan()
 // ─────────────────────────────────────────────
-function rand(min, max) { return Math.random() * (max - min) + min; }
+async function runScan() {
+  const btnLabel = $('btnLabel');
+  const btnSpinner = $('btnSpinner');
+  
+  // UI: Mostrar loading
+  btnLabel.classList.add('hidden');
+  btnSpinner.classList.remove('hidden');
+  $('signalBox').className = 'signal-box neutral';
+  $('signalIcon').textContent = '🔄';
+  $('signalText').textContent = 'ANALISANDO';
+  $('signalSub').textContent = 'Coletando dados de mercado...';
 
-function simulateIndicators(entry) {
-  const rsi   = rand(20, 80);
-  const vwap  = entry * (1 + rand(-0.012, 0.012));
-  const trend = ['ALTA', 'BAIXA', 'LATERAL'][Math.floor(rand(0,3))];
-  const vol   = ['BAIXA','MÉDIA','ALTA'][Math.floor(rand(0,3))];
-  const mom   = rand(-1,1);
-
-  return { rsi, vwap, trend, vol, mom };
+  try {
+    const entryPrice = parseFloat($('entryPrice').value) || 67000;
+    const indicators = await fetchIndicators(entryPrice);
+    const score = calculateConfluenceScore(indicators, entryPrice);
+    const signal = determineSignal(indicators, score);
+    
+    updateIndicatorsUI(indicators);
+    updateSignalUI(signal, score);
+    updateScoreArc(score, signal);
+    addLogEntry(signal, entryPrice, score);
+    recalc();
+    
+  } catch (error) {
+    console.error('Erro no scan:', error);
+    $('signalIcon').textContent = '⚠️';
+    $('signalText').textContent = 'ERRO';
+    $('signalSub').textContent = 'Falha ao analisar mercado';
+    addLogEntry('ERROR', 0, 0, 'Erro na análise');
+  } finally {
+    setTimeout(() => {
+      btnLabel.classList.remove('hidden');
+      btnSpinner.classList.add('hidden');
+    }, 500);
+  }
 }
 
-function scoreCalc(ind, entry) {
-  let s = 50;
-  if (ind.rsi < 35)               s += 20;
-  else if (ind.rsi > 65)          s -= 20;
-  else if (ind.rsi < 45)          s += 8;
-  else if (ind.rsi > 55)          s -= 8;
-
-  if (entry < ind.vwap)           s += 15;
-  else                            s -= 10;
-
-  if (ind.trend === 'ALTA')       s += 10;
-  else if (ind.trend === 'BAIXA') s -= 10;
-
-  if (ind.vol === 'ALTA')         s -= 5;
-  if (ind.vol === 'BAIXA')        s += 5;
-
-  if (ind.mom > 0.4)              s += 10;
-  else if (ind.mom < -0.4)        s -= 10;
-
-  return Math.max(0, Math.min(100, Math.round(s)));
+// ─────────────────────────────────────────────
+//  BUSCA DE INDICADORES (SIMULAÇÃO)
+// ─────────────────────────────────────────────
+async function fetchIndicators(entryPrice) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const marketBias = Math.random() > 0.5 ? 1 : -1;
+      const rsi = Math.max(20, Math.min(80, 50 + (marketBias * 15) + (Math.random() * 20 - 10)));
+      const vwap = entryPrice * (1 + ((Math.random() - 0.5) * 0.02 * marketBias));
+      const trendRoll = Math.random();
+      const trend = trendRoll < 0.4 ? 'BAIXA' : trendRoll < 0.8 ? 'ALTA' : 'LATERAL';
+      const volRoll = Math.random();
+      const vol = volRoll < 0.3 ? 'BAIXA' : volRoll < 0.7 ? 'MÉDIA' : 'ALTA';
+      const mom = (rsi - 50) / 50 + (Math.random() * 0.4 - 0.2);
+      
+      resolve({
+        rsi: parseFloat(rsi.toFixed(1)),
+        vwap: parseFloat(vwap.toFixed(2)),
+        trend,
+        vol,
+        mom: parseFloat(mom.toFixed(2)),
+        price: entryPrice
+      });
+    }, 800);
+  });
 }
 
-function determineSignal(ind, entry) {
-  const buy  = ind.rsi < 35 && entry < ind.vwap;
-  const sell = ind.rsi > 65;
-  if (buy)  return 'BUY';
-  if (sell) return 'SELL';
+// ─────────────────────────────────────────────
+//  CÁLCULO DE SCORE DE CONFLUÊNCIA (0-100)
+// ─────────────────────────────────────────────
+function calculateConfluenceScore(ind, entryPrice) {
+  let score = 50;
+  
+  if (ind.rsi < 30) score += 25;
+  else if (ind.rsi < 45) score += 12;
+  else if (ind.rsi > 70) score -= 25;
+  else if (ind.rsi > 55) score -= 12;
+  
+  if (entryPrice < ind.vwap * 0.995) score += 15;
+  else if (entryPrice > ind.vwap * 1.005) score -= 15;
+  
+  if (ind.trend === 'ALTA') score += 20;
+  else if (ind.trend === 'BAIXA') score -= 20;
+  
+  if (ind.vol === 'ALTA') score = Math.floor(score * 0.9);
+  else if (ind.vol === 'BAIXA') score = Math.floor(score * 1.05);
+  
+  score += Math.round(ind.mom * 10);
+  
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+// ─────────────────────────────────────────────
+//  DETERMINAÇÃO DO SINAL
+// ─────────────────────────────────────────────
+function determineSignal(ind, score) {
+  if (score >= 70 && ind.rsi < 50 && ind.trend !== 'BAIXA') return 'BUY';
+  if (score <= 30 && ind.rsi > 50 && ind.trend !== 'ALTA') return 'SELL';
   return 'NEUTRAL';
 }
 
 // ─────────────────────────────────────────────
-//  Update UI
+//  ATUALIZAÇÃO DA UI - INDICADORES
 // ─────────────────────────────────────────────
-function updateBadge(el, type) {
-  el.className = 'ind-badge';
-  if (type === 'buy')  { el.classList.add('badge-buy');  el.textContent = '▲ COMPRA'; }
-  else if (type==='sell') { el.classList.add('badge-sell'); el.textContent = '▼ VENDA'; }
-  else                 { el.classList.add('badge-neu');  el.textContent = '◆ NEUTRO'; }
+function updateIndicatorsUI(ind) {
+  // RSI
+  $('indRsi').textContent = ind.rsi;
+  const rsiBadge = $('badgeRsi');
+  if (ind.rsi < 30) {
+    rsiBadge.textContent = 'COMPRA';
+    rsiBadge.className = 'ind-badge badge-buy';
+    $('indRsi').style.color = 'var(--green)';
+  } else if (ind.rsi > 70) {
+    rsiBadge.textContent = 'VENDA';
+    rsiBadge.className = 'ind-badge badge-sell';
+    $('indRsi').style.color = 'var(--red)';
+  } else {
+    rsiBadge.textContent = 'NEUTRO';
+    rsiBadge.className = 'ind-badge badge-neu';
+    $('indRsi').style.color = 'var(--text)';
+  }
+  
+  // VWAP
+  $('indVwap').textContent = '$' + ind.vwap.toLocaleString('en-US', {minimumFractionDigits: 2});
+  const vwapBadge = $('badgeVwap');
+  const entry = parseFloat($('entryPrice').value);
+  if (entry < ind.vwap) {
+    vwapBadge.textContent = 'ABAIXO';
+    vwapBadge.className = 'ind-badge badge-buy';
+  } else if (entry > ind.vwap) {
+    vwapBadge.textContent = 'ACIMA';
+    vwapBadge.className = 'ind-badge badge-sell';
+  } else {
+    vwapBadge.textContent = 'NA VWAP';
+    vwapBadge.className = 'ind-badge badge-neu';
+  }
+  
+  // Tendência
+  $('indTrend').textContent = ind.trend;
+  const trendBadge = $('badgeTrend');
+  if (ind.trend === 'ALTA') {
+    trendBadge.textContent = '🟢';
+    trendBadge.className = 'ind-badge badge-buy';
+  } else if (ind.trend === 'BAIXA') {
+    trendBadge.textContent = '🔴';
+    trendBadge.className = 'ind-badge badge-sell';
+  } else {
+    trendBadge.textContent = '🟡';
+    trendBadge.className = 'ind-badge badge-neu';
+  }
+  
+  // Volatilidade
+  $('indVol').textContent = ind.vol;
+  const volBadge = $('badgeVol');
+  volBadge.textContent = ind.vol === 'ALTA' ? '⚠️' : ind.vol === 'BAIXA' ? '✓' : '•';
+  volBadge.className = 'ind-badge badge-neu';
+  
+  // Momentum
+  $('indMom').textContent = ind.mom > 0 ? '+' + ind.mom : ind.mom;
+  const momBadge = $('badgeMom');
+  if (ind.mom > 0.3) {
+    momBadge.textContent = 'FORTE';
+    momBadge.className = 'ind-badge badge-buy';
+  } else if (ind.mom < -0.3) {
+    momBadge.textContent = 'FRACO';
+    momBadge.className = 'ind-badge badge-sell';
+  } else {
+    momBadge.textContent = 'MÉDIO';
+    momBadge.className = 'ind-badge badge-neu';
+  }
 }
 
-function updateArc(score) {
-  const arc   = $('arcFill');
-  const total = 173; // half-circle perimeter ≈ π * r = π * 55
-  const fill  = (score / 100) * total;
-  const color = score >= 70 ? 'var(--green)' : score >= 40 ? 'var(--accent)' : 'var(--red)';
-  arc.setAttribute('stroke-dasharray', fill + ' ' + (total - fill));
-  arc.setAttribute('stroke', color);
-  $('scoreNum').style.color = color;
-  $('scoreNum').textContent = score;
-}
-
-function addLog(type, msg) {
-  const now = new Date().toLocaleTimeString('pt-BR');
-  const li  = document.createElement('div');
-  li.className = 'log-entry';
-  li.innerHTML = `<span class="log-time">${now}</span><span class="log-msg ${type}">${msg}</span>`;
-  const list = $('logList');
-  list.insertBefore(li, list.firstChild);
-  // keep max 8 entries
-  while (list.children.length > 8) list.removeChild(list.lastChild);
-}
-
-async function runScan() {
-  const entry = parseFloat($('entryPrice').value) || 0;
-  if (!entry) { alert('Insira o preço de entrada.'); return; }
-
-  // Loading state
-  $('btnLabel').classList.add('hidden');
-  $('btnSpinner').classList.remove('hidden');
-
-  // Simulate async delay (remove when using real API)
-  await new Promise(r => setTimeout(r, 900));
-
-  // ── Replace this block with real API fetch ──
-  const ind    = simulateIndicators(entry);
-  const signal = determineSignal(ind, entry);
-  const score  = scoreCalc(ind, entry);
-  // ────────────────────────────────────────────
-
-  // Signal box
+// ─────────────────────────────────────────────
+//  ATUALIZAÇÃO DA UI - SINAL E SCORE
+// ─────────────────────────────────────────────
+function updateSignalUI(signal, score) {
   const box = $('signalBox');
-  box.className = 'signal-box ';
+  const icon = $('signalIcon');
+  const text = $('signalText');
+  const sub = $('signalSub');
+  
+  box.className = 'signal-box';
+  
   if (signal === 'BUY') {
     box.classList.add('buy');
-    $('signalIcon').textContent = '🟢';
-    $('signalText').textContent = 'COMPRA DETECTADA';
-    $('signalSub').textContent  = 'RSI baixo + Preço abaixo do VWAP';
-    addLog('buy', `BUY signal — RSI ${ind.rsi.toFixed(1)} | VWAP $${ind.vwap.toFixed(2)} | Score ${score}`);
+    icon.textContent = '🟢';
+    text.textContent = 'COMPRA';
+    sub.textContent = `Score: ${score}/100 • Entrada confirmada`;
   } else if (signal === 'SELL') {
     box.classList.add('sell');
-    $('signalIcon').textContent = '🔴';
-    $('signalText').textContent = 'VENDA DETECTADA';
-    $('signalSub').textContent  = 'RSI elevado — aguardar recuo';
-    addLog('sell', `SELL signal — RSI ${ind.rsi.toFixed(1)} | VWAP $${ind.vwap.toFixed(2)} | Score ${score}`);
+    icon.textContent = '🔴';
+    text.textContent = 'VENDA';
+    sub.textContent = `Score: ${score}/100 • Aguardar pullback`;
   } else {
     box.classList.add('neutral');
-    $('signalIcon').textContent = '🟡';
-    $('signalText').textContent = 'MERCADO NEUTRO';
-    $('signalSub').textContent  = 'Aguardar confluência de sinais';
-    addLog('neu', `NEUTRAL — RSI ${ind.rsi.toFixed(1)} | VWAP $${ind.vwap.toFixed(2)} | Score ${score}`);
+    icon.textContent = '🟡';
+    text.textContent = 'AGUARDAR';
+    sub.textContent = `Score: ${score}/100 • Sem confluência clara`;
   }
-
-  // Indicators
-  $('indRsi').textContent  = ind.rsi.toFixed(1);
-  $('indVwap').textContent = '$' + ind.vwap.toFixed(2);
-  $('indTrend').textContent= ind.trend;
-  $('indVol').textContent  = ind.vol;
-  $('indMom').textContent  = ind.mom > 0 ? '+' + ind.mom.toFixed(2) : ind.mom.toFixed(2);
-
-  $('indRsi').style.color  = ind.rsi < 35 ? 'var(--green)' : ind.rsi > 65 ? 'var(--red)' : 'var(--text)';
-  $('indVwap').style.color = entry < ind.vwap ? 'var(--green)' : 'var(--red)';
-  $('indTrend').style.color= ind.trend==='ALTA'?'var(--green)':ind.trend==='BAIXA'?'var(--red)':'var(--yellow)';
-  $('indMom').style.color  = ind.mom > 0 ? 'var(--green)' : 'var(--red)';
-
-  updateBadge($('badgeRsi'),   ind.rsi < 35 ? 'buy' : ind.rsi > 65 ? 'sell' : 'neu');
-  updateBadge($('badgeVwap'),  entry < ind.vwap ? 'buy' : 'sell');
-  updateBadge($('badgeTrend'), ind.trend==='ALTA'?'buy':ind.trend==='BAIXA'?'sell':'neu');
-  updateBadge($('badgeVol'),   ind.vol==='BAIXA'?'buy':ind.vol==='ALTA'?'sell':'neu');
-  updateBadge($('badgeMom'),   ind.mom > 0.3 ? 'buy' : ind.mom < -0.3 ? 'sell' : 'neu');
-
-  updateArc(score);
-  recalc();
-
-  // Restore button
-  $('btnLabel').classList.remove('hidden');
-  $('btnSpinner').classList.add('hidden');
 }
+
+function updateScoreArc(score, signal) {
+  const arc = $('arcFill');
+  const num = $('scoreNum');
+  const circumference = 173;
+  
+  const offset = circumference - (score / 100) * circumference;
+  arc.style.strokeDasharray = `${circumference - offset} ${offset}`;
+  
+  const color = signal === 'BUY' ? 'var(--green)' : 
+                signal === 'SELL' ? 'var(--red)' : 'var(--yellow)';
+  arc.style.stroke = color;
+  
+  num.textContent = score;
+  num.style.color = color;
+}
+
+// ─────────────────────────────────────────────
+//  LOG DE SINAIS
+// ─────────────────────────────────────────────
+function addLogEntry(signal, entryPrice, score, customMsg = null) {
+  const logList = $('logList');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  
+  const time = new Date().toLocaleTimeString('pt-BR', {hour12: false});
+  const msg = customMsg || `Sinal ${signal} • Score: ${score} • Entrada: $${entryPrice}`;
+  const signalClass = signal === 'BUY' ? 'buy' : signal === 'SELL' ? 'sell' : 'neu';
+  
+  entry.innerHTML = `<span class="log-time">${time}</span><span class="log-msg ${signalClass}">${msg}</span>`;
+  
+  logList.insertBefore(entry, logList.firstChild);
+  if (logList.children.length > 10) {
+    logList.removeChild(logList.lastChild);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  MOBILE UX ENHANCEMENTS
+// ─────────────────────────────────────────────
+document.querySelectorAll('input[type=number]').forEach(input => {
+  input.addEventListener('focus', () => {
+    const viewport = document.querySelector('meta[name=viewport]');
+    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+  });
+  input.addEventListener('blur', () => {
+    const viewport = document.querySelector('meta[name=viewport]');
+    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
+  });
+});
+
+function triggerHaptic(pattern = [10, 50, 10]) {
+  if (navigator.vibrate) navigator.vibrate(pattern);
+}
+
+// ─────────────────────────────────────────────
+//  INICIALIZAÇÃO
+// ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  recalc();
+  console.log('🚀 ScalpCalc Robot Mode carregado');
+});
 </script>
+
 </body>
 </html>
